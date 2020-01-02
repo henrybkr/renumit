@@ -34,7 +34,7 @@ sys.path.insert(1, r'app\history')
 sys.path.insert(1, r'app\scripts')
 sys.path.insert(1, r'app\sorting')
 
-import utilities, readConfig, configCheck # pylint: disable=import-error
+import utilities, readConfig, configCheck, filenameReview, renamer # pylint: disable=import-error
 
 #########################
 # Application run order:
@@ -53,15 +53,13 @@ try:
 		# Confirm api keys work
 		apiCheckResult = configCheck.apiKeyLocator(configData['apiKeys'])
 		#print(apiCheckResult)
-		if apiCheckResult[0] == 1:
-			print(apiCheckResult[1])
-			# Perfect result. All keys present
-		elif apiCheckResult[0] == 2:
-			# One or more key not present. Acceptable result.
-			print(apiCheckResult[1])
-		else:
+		if apiCheckResult[0] == 0:
 			# No keys present, fail.
 			print(apiCheckResult[1])
+		else:
+			# If at least one api key is found...
+			print(apiCheckResult[1])
+
 
 		# Now lets check that the keys are functional.
 		test = configCheck.apiTest("tmdb", configData['apiKeys'][0]['key'])
@@ -78,6 +76,7 @@ try:
 		while appContinue == True:
 			menuResult = utilities.menu()
 			if menuResult[0] == 0:
+				# If the result is 0, end the while loop, ending the application.
 				appContinue = False
 			else:
 				# Here we should launch the additional options in the menu. Might want to launch them from the menu utility itself, idk.
@@ -85,10 +84,29 @@ try:
 				
 	# Otherwise, begin making use of file paths.
 	else:
-		print("file paths present!")
-		
-		for current_path in filePaths:
-			print(current_path)
+		# Initialise some variables that we'll use later:
+
+		inputPathsProcessedCount = 0     				# Count used to track how many input directories (parametors) have been processed.
+		processedFileCount = 0							# Same as above but for files.
+
+		for currentPath in filePaths:
+			# Year collection
+			year = filenameReview.getYear(currentPath, configData['debugMode'])
+			# Title collection with or without year
+			if year:
+				title = filenameReview.getName(currentPath, configData['debugMode'], year)
+			else:
+				title = filenameReview.getName(currentPath, configData['debugMode'])
+			
+			print(currentPath)
+			print('"'+title+'"')
+			print(year)
+			
+			#print(nameYear)
+
+			inputPathsProcessedCount+=1					# Increment the processed path count.
+			#print(currentPath)
+			
 	
 	# End of application
 	print("\n-- Info: Application closure.\n")
