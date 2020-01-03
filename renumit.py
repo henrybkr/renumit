@@ -39,73 +39,66 @@ import utilities, readConfig, configCheck, filenameReview, renamer # pylint: dis
 #########################
 # Application run order:
 try:
-	utilities.clear_win()																														# Clear the window on first launch.
-	filePaths = utilities.intro(sys.argv[1:])																									# Run intro and review potential file paths provided to app
+	utilities.clear_win()																										# Clear the window on first launch.
+	filePaths = utilities.intro(sys.argv[1:])																					# Run intro and review potential file paths provided to app
 	
-	configJSON = readConfig.read(os.path.dirname(os.path.abspath(__file__)))																	# Collect config json.
+	configJSON = readConfig.read(os.path.dirname(os.path.abspath(__file__)))													# Collect config json.
 	configData = json.loads(configJSON)
-	apisChecked = []																															# Will define what API's are working
+	apiKeychain = []
+	debugMode = False																											# Empty now but used for what API's are working
 	
-	if(configJSON):
+	if not(configJSON):
+		print("-- Hmm, problem with your configuration settings!")
+	else:
 		print("-- Config file loaded ----------------------------------------------------------")
 		utilities.writeLine()
 		
 		# Confirm api keys work
-		apiCheckResult = configCheck.apiKeyLocator(configData['apiKeys'])
-		#print(apiCheckResult)
+		apiCheckResult = configCheck.apiKeyAvailable(configData['apiKeys'])														# Launch apiKeyAvailable function
+		
+		# Enable debug flag if required														
+		debugMode = bool(configData['debugMode'])
+		
 		if apiCheckResult[0] == 0:
 			# No keys present, fail.
 			print(apiCheckResult[1])
 		else:
-			# If at least one api key is found...
-			print(apiCheckResult[1])
+			# If at least one api key is found, test which ones are working.
+			print(apiCheckResult[1])																							# Output api key info
 
+			# Now lets check that the keys are functional.
+			tmdbWorking = configCheck.apiTest("tmdb", configData['apiKeys'][0]['key'], debugMode)
+			tvdbWorking = configCheck.apiTest("tvdb", configData['apiKeys'][1]['key'], debugMode)
+			omdbWorking = configCheck.apiTest("omdb", configData['apiKeys'][2]['key'], debugMode)
 
-		# Now lets check that the keys are functional.
-		test = configCheck.apiTest("tmdb", configData['apiKeys'][0]['key'])
-		#if test:
-		#	print(test)
-		# start renaming stuff!
-	else:
-		print("-- Hmm, problem with your configuration settings!")
-	
-	# Produce a menu to the user if no file paths provided.
-	if not filePaths:
-		# Make sure the menu is consistently displayed until a exit command is given.
-		appContinue = True
-		while appContinue == True:
-			menuResult = utilities.menu()
-			if menuResult[0] == 0:
-				# If the result is 0, end the while loop, ending the application.
-				appContinue = False
-			else:
-				# Here we should launch the additional options in the menu. Might want to launch them from the menu utility itself, idk.
-				print("\nMenu option was successfully chosen. However, functionality not currently there.")
+			# Currently focusing on tmdb. Should consider how to add support for others later.
+			#   Example: read config for preferred api-only or preferred order (might fail to find a title with one?)
+			if tmdbWorking:
+				# Produce a menu to the user if no file paths provided.
+				if not filePaths:
+					utilities.beginMenu()
+							
+				# Otherwise, begin making use of file paths.
+				else:
+					
+					# Initialise some variables that we'll use later:
+
+					inputPathsProcessedCount = 0     				# Count used to track how many input directories (parametors) have been processed.
+					processedFileCount = 0							# Same as above but for files.
+
+					for currentPath in filePaths:
+						
+						sortingResult = renamer.sorter(currentPath, debugMode)
+						
+						if sortingResult[0] == False:
+							print("\n-- Error: "+sortingResult[1])
+							print("'"+currentPath+"'\n")
+						
+						#print(nameYear)
+
+						inputPathsProcessedCount+=1					# Increment the processed path count.
+						#print(currentPath)
 				
-	# Otherwise, begin making use of file paths.
-	else:
-		# Initialise some variables that we'll use later:
-
-		inputPathsProcessedCount = 0     				# Count used to track how many input directories (parametors) have been processed.
-		processedFileCount = 0							# Same as above but for files.
-
-		for currentPath in filePaths:
-			# Year collection
-			year = filenameReview.getYear(currentPath, configData['debugMode'])
-			# Title collection with or without year
-			if year:
-				title = filenameReview.getName(currentPath, configData['debugMode'], year)
-			else:
-				title = filenameReview.getName(currentPath, configData['debugMode'])
-			
-			print(currentPath)
-			print('"'+title+'"')
-			print(year)
-			
-			#print(nameYear)
-
-			inputPathsProcessedCount+=1					# Increment the processed path count.
-			#print(currentPath)
 			
 	
 	# End of application
@@ -115,5 +108,5 @@ try:
 except Exception as e:
 	#os.system("pause")
 	print("Sorry, looks like the app has failed somewhere...\nPlease provide the following information to me on my github page:\n")
-	raise
 	os.system("pause")
+	raise

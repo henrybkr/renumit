@@ -19,7 +19,8 @@ def intro(filePaths=None):
 		return filePaths																									# Return the list of filepaths
 	else:
 		return False
-		
+
+# The menu itself, displaying information to the user.		
 def menu():
 	app_continue = True
 	user_choice = False
@@ -56,8 +57,18 @@ def menu():
 		except:
 			print("Hmm, invalid input on the menu or something.")
 
-
-		
+# Continues to display the menu till the application is told to exit.
+def beginMenu():
+	# Make sure the menu is consistently displayed until a exit command is given.
+	
+	appContinue = True
+	while appContinue == True:
+		menuResult = menu()				# Present menu to user
+		if menuResult[0] == 0:
+			appContinue = False			# If the result is 0, end the while loop, ending the application.
+		else:
+			# Here we should launch the additional options in the menu. Might want to launch them from the menu utility itself, idk.
+			print("\nMenu option was successfully chosen. However, functionality not currently there.")		
 
 
 # Function to write a single line to the cli

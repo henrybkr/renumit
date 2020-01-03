@@ -13,7 +13,7 @@ import utilities, tmdbHelper # pylint: disable=import-error
 import json
 
 # Primary area for confirming api keys are valid
-def apiKeyLocator(data):
+def apiKeyAvailable(data):
 	# Loop through the received api json data to check existence of api keys
 	
 	# Basic check to confirm all api keys are present before moving on.
@@ -35,53 +35,54 @@ def apiKeyLocator(data):
 # Functionality used for testing that api's are operational with a specified search. Offers debug mode to output the received string to the user if desired.
 def apiTest(api, key, debug=None):
 	#result = None																					# Initialised as empty. Will fail if not changed.
-
-	# TMDb
-	if api == "tmdb":
-		data = tmdbHelper.test(key)
-		print(utilities.line+"\n")																	# Extra new line for improved presentation.
-		
-		# Now we have some data, check that it's useful and not an error message etc.
-		if data:
-			try:
-				tmdb_title = data['results'][0]['title']
+	
+	try:
+		# TMDb
+		if api is "tmdb":
+			data = tmdbHelper.test(key)
+			print(utilities.line+"\n")																	# Extra new line for improved presentation.
+			
+			# Now we have some data, check that it's useful and not an error message etc.
+			if data:
+				try:
+					tmdbTitle = data['results'][0]['title']
+					
+					if tmdbTitle == "The Matrix":
+						print("-- Info: Good response from TMDb.")
+						return True																											# Provide confirmation working as expected
+					else:
+						if debug:
+							print("-- Debug Warning: Api response not as expected. Response: "+tmdbTitle+" (Expected 'The Matrix')")		# Debug warning
+						else:
+							print("-- Error: TMDB API response received but is not as expected. Consider confirming via debug mode.")		# Standard user warning
+						
+				except:
+					if debug:
+						print("-- Debug: Data from TMDb was returned, but no title was located. Response from TMDb:")
+						utilities.writeLine()
+						print(data)
+						utilities.writeLine()
+					return False
+			else:
 				if debug:
-					print("TMDb title response: "+tmdb_title)
-			except:
-				if debug:
-					print("-- Debug: Data from TMDb was returned, but no title was located. Response from TMDb:")
-					utilities.writeLine()
-					print(data)
-					utilities.writeLine()
+					print("-- Debug: TMDb test returned no data.")
 				return False
-		else:
-			if debug:
-				print("-- Debug: TMDb test returned no data.")
-			return False
-	
-		#return testResult
-
-	#result2 = tmdbHelper.search(key, "The Simpsons Movie", 2007)					# Request data from TMDb on given query.
-
-	#print(result)
-	
-	
-	
-	
-	# TMDb
-	if api is "tmdb":
-
 		
-		return True
-	# TheTVDB
-	elif api is 2:
-		print("Should work on TVDB mode here.")
-		return True
-	# OMDb
-	elif api is 3:
-		print("Should work on OMDB mode here.")
-		return True
-	else:
-		print("-- Error: Problem selecting mode in apiKeyChecker")
-		return False
-	
+			#return testResult
+
+		#result2 = tmdbHelper.search(key, "The Simpsons Movie", 2007)					# Request data from TMDb on given query.
+
+		#print(result)
+		
+		elif api is "tvdb":
+			print("-- Info: TVDB check not yet functional.")
+			return False
+		# OMDb
+		elif api is "omdb":
+			print("-- Info: OMDB check not yet functional.")
+			return False
+		else:
+			print("-- Error: Problem selecting mode in apiKeyChecker")
+			return False
+	except:
+		print("-- Error: Error with api apiTest.")

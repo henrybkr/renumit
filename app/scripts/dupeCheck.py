@@ -17,13 +17,14 @@ name_lists = []																					# Variable to retain multiple lists of "name
 total_dupes = 0																					# Variable to retain total number of dupes located.
 
 #G:\#renumit
+#G:\Movies ONE
 #H:\Movies TWO
 #O:\Movies THREE
 
 #E:\Renumit_sorted
 
 ## Note to self, for now, always put the first location as the one you want to move to a dupe folder.
-locations_to_check = ['O:\Movies THREE', 'F:\Renumit_Sorted']
+locations_to_check = ['G:\Movies ONE', 'F:\Renumit_Sorted']
 
 # Function to grab a list of all subfolder names of a given path and return it as an array/list.
 def get_list(input_path, append=None):

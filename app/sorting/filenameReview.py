@@ -11,6 +11,7 @@ import re
 sys.path.insert(1, r'\app\scripts')
 sys.path.insert(1, r'\app\api')
 import utilities # pylint: disable=import-error
+from datetime import date
 
 # Attempt to collect a name and year from a path
 def getYear(path, debug):
@@ -21,7 +22,8 @@ def getYear(path, debug):
 	# Then looks for 4 digits surrounded by whitespace on each side " 2000 ". Dot titles are converted to spaces so bypasses that issue.
 	# Fail if still not found.
 
-	filename = path.replace(".", " ").split('\\')[-1]								# Get final file or folder from path	
+	filename = path.replace(".", " ").split('\\')[-1]								# Get final file or folder from path
+	error = False																	# Empty error variable, will be used to hold potential error return strings
 
 	# Initialised variables
 	unconfirmedYear, year = 0, 0
@@ -56,16 +58,22 @@ def getYear(path, debug):
 		print("'"+str(year)+"'")
 		utilities.writeLine()
 
-	if year != 0:
-		return year
+	currentYear = int(date.today().strftime("%Y"))										# Current year, used as a reference for how high a year should be (+3 years over just in case)
+	if (year == 0):
+		error = "Failed to find a suitable year match. This title should be confirmed by the user."
 	else:
-		return False
+		error = "Detected year is not within expected year range of (1888-"+str(currentYear+3)+")"
+	
+	# Will return either a valid number or 0, indicating fail (and a error)
+	return (year, error)
+		
+
 	
 	
 def getName(path, debug, year=None):
 
 	try:
-		title = stripBadCharacters(path).replace(')',"").replace('(',"").replace(']','').replace('[','').split(year)[0].strip().split("\\")[-1]
+		title = stripBadCharacters(path).replace("."," ").replace(')',"").replace('(',"").replace(']','').replace('[','').split(year)[0].strip().split("\\")[-1]
 
 		return title
 	except:
