@@ -96,3 +96,19 @@ def confirm(message):
 			return False
 		else:
 			print_color("yellow", "Invalid input. Try again!")
+
+# Function to read all paths from a set of given lists if they exist.
+def pathValidityDebug(validPaths, invalidPaths):
+	print("\n\nFILE PATH REVIEW:\n"+line)
+	if validPaths:
+		print("\nValid Paths:\n"+line)
+		for filePath in validPaths:
+			print(filePath)	
+	if invalidPaths:
+		print("\nInvalid Paths:\n"+line)
+		for filePath in invalidPaths:
+			print(filePath)
+
+	# Since this is a debug mode option, the list is displayed but time is given to review it before moving to the next step
+	print("\nReady to continue?\n")
+	os.system("pause")

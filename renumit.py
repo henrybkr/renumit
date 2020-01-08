@@ -83,21 +83,52 @@ try:
 					
 					# Initialise some variables that we'll use later:
 
+					validPaths, invalidPaths = [], []
 					inputPathsProcessedCount = 0     				# Count used to track how many input directories (parametors) have been processed.
 					processedFileCount = 0							# Same as above but for files.
 
+					# Error lists
+
+					cleanupPaths, renameErrors, renameArray = [],[],[]		# Lists for holding paths about errors, clean up errors, rename errors and the planned renames.
+
+					# Run preliminary checks
 					for currentPath in filePaths:
+						try:
+							validCheck = renamer.pathValid(currentPath)		# Run the validPath checker
+							if validCheck[0]:
+								validPaths.append(currentPath)				# Append to valid path list if accepted
+							else:
+								invalidPaths.append(currentPath)			# Append to invalid path list if not accepted
+
+							
+						except:
+							print("\n-- Critical Error: Problem running preliminary checks on: "+currentPath)
+							utilities.writeLine()
+							raise
+					
+					
+
+					# Once the preliminary checks are complete, move onto actual sorting.
+									
+					if debugMode:
+						utilities.pathValidityDebug(validPaths, invalidPaths)	# Output validity listings if debug mode enabled	
 						
-						sortingResult = renamer.sorter(currentPath, debugMode)
-						
+					for path in validPaths:
+						sortingResult = renamer.sorter(path, debugMode)
+				
 						if sortingResult[0] == False:
 							print("\n-- Error: "+sortingResult[1])
 							print("'"+currentPath+"'\n")
-						
-						#print(nameYear)
+						else:
+							inputPathsProcessedCount+=1					# Increment the processed path count.
+							renameArray.append({'title':sortingResult[2], 'year':sortingResult[3]})
 
-						inputPathsProcessedCount+=1					# Increment the processed path count.
-						#print(currentPath)
+					utilities.writeLine()
+					for a in renameArray:
+						print(a['title'], "("+a['year']+")")
+
+					
+					#print(currentPath)
 				
 			
 	
