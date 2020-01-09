@@ -5,6 +5,7 @@
 ##########################################################################################################################
 
 import os
+from terminaltables import AsciiTable
 
 line = "--------------------------------------------------------------------------------"
 clear_win = lambda: os.system('cls')											# Empty (windows) cmd window
@@ -22,7 +23,6 @@ def intro(filePaths=None):
 
 # The menu itself, displaying information to the user.		
 def menu():
-	app_continue = True
 	user_choice = False
 	
 	
@@ -44,7 +44,6 @@ def menu():
 			if menuChoice == 0:
 				# Exit application
 				user_choice = True																						# Confirm user has made a choice allowing exit of menu.
-				app_continue = False																					# Allow the main app loop to end.
 				return [0,0]																							# Should be interpretted as [menu loop can end, option was exit]
 			elif menuChoice == 1:
 				# Check Renumit can communicate with an API 
@@ -82,7 +81,7 @@ def checkExist(path):
 	else:
 		return False
 		
-# Function to gain user confirmation with y or n characters. Returns true or false. Optional message input parametor.
+# Function to gain user confirmation with y or n characters. Returns true or false. Optional message input parameter.
 def confirm(message):
 	while True:
 		if message:
@@ -95,7 +94,7 @@ def confirm(message):
 		elif answer == "n":
 			return False
 		else:
-			print_color("yellow", "Invalid input. Try again!")
+			print("Invalid input. Try again!")
 
 # Function to read all paths from a set of given lists if they exist.
 def pathValidityDebug(validPaths, invalidPaths):
@@ -112,3 +111,21 @@ def pathValidityDebug(validPaths, invalidPaths):
 	# Since this is a debug mode option, the list is displayed but time is given to review it before moving to the next step
 	print("\nReady to continue?\n")
 	os.system("pause")
+
+def reportErrors(filePaths, invalidPaths, renameErrors):
+	# Report errors from the related error arrays if errors exist.
+
+	if invalidPaths or renameErrors:											# Only continue if any errors actually exist.
+		print("\nWhoops, looks like we've got some errors...\n")				# Generic user feedback
+		invalidTableData, renameErrorTableData = [], []							# Table data lists
+		# invalidPaths first
+		for i in invalidPaths:
+			invalidTableData.append([i,"Path invalid"])							# Includes a generic invalid path message. Might need revisiting later if multiple invalid filepath possibilities (read errors, etc)
+		# Now for rename errors
+		for r in renameErrors:
+			renameErrorTableData.append([r['path'], r['error']])				# Include both the path and the error
+		# Now let's look at displaying the error results to the user
+		if invalidPaths:
+			print(AsciiTable(invalidTableData, "Invalid Paths").table)			# Print the table of errors
+		if renameErrors:
+			print(AsciiTable(renameErrorTableData, "Rename Errors").table)		# Print the table of errors

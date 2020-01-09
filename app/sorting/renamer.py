@@ -47,12 +47,15 @@ def sorter(inputPath, debugMode):
 		title = filenameReview.getName(inputPath, debugMode, year)
 	else:
 		title = filenameReview.getName(inputPath, debugMode)
-
-	print(inputPath)
-	try:
-		print('Movie Title -- '+title+' ('+year+')')
-	except:
-		print('Movie Title -- '+title+' -- no valid year found')
-	#print(year)
+	
+	# Debug output only
+	if debugMode:
+		print("\nDebug Output: ")
+		utilities.writeLine()
+		print('Input Path -- '+inputPath)
+		try:
+			print('Movie Title & Year -- '+title+' ('+year+')')
+		except:
+			print('Movie Title -- '+title+' -- no valid year found')
 
 	return (True, error, title, year)

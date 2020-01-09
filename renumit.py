@@ -23,6 +23,8 @@
 import os
 import sys
 import json
+import re
+import glob
 
 #########################
 # Internal imports
@@ -34,7 +36,11 @@ sys.path.insert(1, r'app\history')
 sys.path.insert(1, r'app\scripts')
 sys.path.insert(1, r'app\sorting')
 
-import utilities, readConfig, configCheck, filenameReview, renamer # pylint: disable=import-error
+import utilities, readConfig, configCheck, filenameReview, renamer, tmdbHelper # pylint: disable=import-error
+
+#########################
+# Global variables, testing only:
+testMode = True
 
 #########################
 # Application run order:
@@ -89,7 +95,7 @@ try:
 
 					# Error lists
 
-					cleanupPaths, renameErrors, renameArray = [],[],[]		# Lists for holding paths about errors, clean up errors, rename errors and the planned renames.
+					cleanupPaths, renameErrors, nameYearsArray, renameArray = [],[],[],[]		# Lists for holding paths about errors, clean up errors, rename errors and the planned renames.
 
 					# Run preliminary checks
 					for currentPath in filePaths:
@@ -121,14 +127,43 @@ try:
 							print("'"+currentPath+"'\n")
 						else:
 							inputPathsProcessedCount+=1					# Increment the processed path count.
-							renameArray.append({'title':sortingResult[2], 'year':sortingResult[3]})
+							nameYearsArray.append({'title':sortingResult[2], 'year':sortingResult[3]})
 
 					utilities.writeLine()
-					for a in renameArray:
+					for a in nameYearsArray:
 						print(a['title'], "("+a['year']+")")
 
 					
-					#print(currentPath)
+					utilities.writeLine()
+					utilities.writeLine()
+
+					for path in validPaths:
+						# Note to self, glob doesn't seem to like square brackets, so removing seems to do the trick
+						myPath = re.sub(r'([\[\]])','[\\1]',path)
+						
+						pathMainContentList = [f for f in glob.glob(myPath + "**/*.*", recursive=True)]
+						
+						#print(path)
+						#print(str(pathMainContentList))
+
+						if len(pathMainContentList) > 1:
+							renameErrors.append({'path': path, 'error': "More than one file in main directory"})	# Report back and error about multiple files in main movie directory.
+							# This would be considered a rename that needs manually checking - for now
+					
+						else:
+							try:
+								mainMovieFile = os.path.splitext(pathMainContentList[0])[0]
+							except:
+								print("Cannot locate main content file. Empty folder?")
+							
+							# Only continue if main content is located.
+							if mainMovieFile:
+								print(mainMovieFile)
+
+
+
+					# Launch the error report functionality. Only displays errors if there are any.
+					utilities.reportErrors(filePaths, invalidPaths, renameErrors)
 				
 			
 	
@@ -138,6 +173,9 @@ try:
 
 except Exception as e:
 	#os.system("pause")
-	print("Sorry, looks like the app has failed somewhere...\nPlease provide the following information to me on my github page:\n")
+	print("\n\n"+utilities.line+"\nSorry, looks like the app has failed somewhere...\nPlease provide the following information to me on my github page:\n"+utilities.line+"\nhttps://github.com/henrybkr/renumit\n"+utilities.line)
+	
+	# Raise the issue only if the internal debug mode active.
+	if testMode:
+		raise
 	os.system("pause")
-	raise
