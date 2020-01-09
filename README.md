@@ -1,4 +1,4 @@
-<p align="center"><img src="https://github.com/henrybkr/renumit/blob/master/data/logo.png" width="300"></p>
+<p align="center"><img src="https://github.com/henrybkr/renumit/blob/master/data/logo_1.png" width="350"></p>
 
 # 'Renumit'
 > Deriving from the Romanian word name for 'renamed' but also 'renowned' or 'famous'. I can be considered something of a play on words. In the Romanian language 're' refers to 'again' whereas 'numit' refers to being 'named'.
