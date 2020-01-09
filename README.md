@@ -1,11 +1,15 @@
 <p align="center"><img src="https://github.com/henrybkr/renumit/blob/master/data/logo.png" width="300"></p>
 
 # 'Renumit'
-> Deriving from the Romanian word name for 'renamed' but also being renowned or famous, being something of a play on words. In the Romanian language 're' refers to 'again' whereas 'numit' refers to being 'named'.
+> Deriving from the Romanian word name for 'renamed' but also 'renowned' or 'famous'. I can be considered something of a play on words. In the Romanian language 're' refers to 'again' whereas 'numit' refers to being 'named'.
+
+## Important Notes
+* This application is currently in development and not yet ready for use!
+* Currently only supported on Windows - Testing on Windows 10
 
 ## About
 
-Another personal project making use of python to build a CLI based application for sorting personal media. The job of this application is to take given file paths parameters and make assumptions in order to sort them in a desired way. The primary focus will firstly be the sorting movie files into a chosen directory.
+This is another personal project this time making use of python to build a CLI based application for the sorting personal media. The job of this application is to take given file paths parameters and make assumptions in order to sort them in a desired way. The primary focus will firstly be the sorting movie files into a chosen directory.
 
 This is a re-write of an existing functional, yet messy application. The idea is to make the existing app more modular and readable in order to improve chances of later extending it's functionality.
 
@@ -34,12 +38,12 @@ This is a re-write of an existing functional, yet messy application. The idea is
 * Remove unwanted keywords from files that are not directly renamed
 * Configurable option to delete/recycle unwanted filetypes or specific filenames
 * Configurable option to remove specific metadata from (for now just) MKV file formats such as track names
-
-## Important Note
-* Currently only supported on Windows - Testing on Windows 10
+* Read and sort television series
+* Capability of comparing potential user duplicates and automatically decide which one to keep.
 
 ## Technologies Utilised
 * [Python 3.7.3](https://www.python.org/)
 * [MediaInfo](https://mediaarea.net/)
 * [tmdbsimple](https://github.com/celiao/tmdbsimple) via [TMDb](https://www.themoviedb.org/)
 * [send2trash](https://github.com/hsoft/send2trash) - Cross-platform recycle/trash library
+* [terminaltables](https://github.com/Robpol86/terminaltables) - Table drawing for console applications
