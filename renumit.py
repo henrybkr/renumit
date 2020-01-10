@@ -48,11 +48,12 @@ try:
 	utilities.clear_win()																										# Clear the window on first launch.
 	filePaths = utilities.intro(sys.argv[1:])																					# Run intro and review potential file paths provided to app
 	
-	configJSON = readConfig.read(os.path.dirname(os.path.abspath(__file__)))													# Collect config json.
+	mainDir = os.path.dirname(os.path.abspath(__file__))
+	configJSON = readConfig.read(mainDir)													# Collect config json.
 	configData = json.loads(configJSON)
 	apiKeychain = []
 	debugMode = False																											# Empty now but used for what API's are working
-	
+
 	if not(configJSON):
 		print("-- Hmm, problem with your configuration settings!")
 	else:
@@ -105,20 +106,16 @@ try:
 								validPaths.append(currentPath)				# Append to valid path list if accepted
 							else:
 								invalidPaths.append(currentPath)			# Append to invalid path list if not accepted
-
-							
 						except:
 							print("\n-- Critical Error: Problem running preliminary checks on: "+currentPath)
 							utilities.writeLine()
 							raise
 					
-					
-
-					# Once the preliminary checks are complete, move onto actual sorting.
-									
+					# Output validity listings if debug mode enabled
 					if debugMode:
-						utilities.pathValidityDebug(validPaths, invalidPaths)	# Output validity listings if debug mode enabled	
-						
+						utilities.pathValidityDebug(validPaths, invalidPaths)
+					
+					# Once the preliminary checks are complete, move onto actual sorting						
 					for path in validPaths:
 						sortingResult = renamer.sorter(path, debugMode)
 				
@@ -126,39 +123,52 @@ try:
 							print("\n-- Error: "+sortingResult[1])
 							print("'"+currentPath+"'\n")
 						else:
-							inputPathsProcessedCount+=1					# Increment the processed path count.
-							nameYearsArray.append({'title':sortingResult[2], 'year':sortingResult[3]})
+							inputPathsProcessedCount+=1						# Increment the processed path count.
+							nameYearsArray.append({
+								'title':sortingResult[2],
+								'year':sortingResult[3]
+								})
 
-					utilities.writeLine()
-					for a in nameYearsArray:
-						print(a['title'], "("+a['year']+")")
-
+					utilities.nameYearTable(nameYearsArray)					# Output list of expected valid name/years we'll be processing
 					
-					utilities.writeLine()
 					utilities.writeLine()
 
 					for path in validPaths:
-						# Note to self, glob doesn't seem to like square brackets, so removing seems to do the trick
-						myPath = re.sub(r'([\[\]])','[\\1]',path)
+						mainMovieFileLocated = False
+						myPath = re.sub(r'([\[\]])','[\\1]',path)														# Note to self, glob doesn't seem to like square brackets, so removing seems to do the trick
+						pathMainContentList = [f for f in glob.glob(myPath + "**/*.*", recursive=True)]					# Collect a full list of all files in the main directory
 						
-						pathMainContentList = [f for f in glob.glob(myPath + "**/*.*", recursive=True)]
-						
-						#print(path)
-						#print(str(pathMainContentList))
-
+						# In the event of more than one "main" file being located...
 						if len(pathMainContentList) > 1:
-							renameErrors.append({'path': path, 'error': "More than one file in main directory"})	# Report back and error about multiple files in main movie directory.
-							# This would be considered a rename that needs manually checking - for now
-					
+							for x in pathMainContentList:
+								if not ".mkv" in x or not ".mp4" in x:
+									pathMainContentList.remove(x)														# Remove non video files from the array if any exist.
+
+							# Check to see if still more than one video file remains in the list
+							if not len(pathMainContentList) > 1:
+								renameErrors.append({'path': path, 'error': "More than one file in main directory"})	# Report back and error about multiple video files in main movie directory.
+							else:
+								mainMovieFileLocated = True
+						elif len(pathMainContentList) == 0:
+							renameErrors.append({'path': path, 'error': "No main file found. Potential empty folder"})	# Report back issue with finding the "main" media file.
+						
 						else:
+							# Only one "main" file found in the directory (good!)
+							mainMovieFileLocated = True
+					
+						# Will only continue if the main movie file is located.
+						if mainMovieFileLocated:
 							try:
-								mainMovieFile = os.path.splitext(pathMainContentList[0])[0]
+								mainMovieFile = pathMainContentList[0]
 							except:
-								print("Cannot locate main content file. Empty folder?")
+								print("Warning -- Issue selecting main content file")
 							
 							# Only continue if main content is located.
 							if mainMovieFile:
-								print(mainMovieFile)
+								# Now begin to collect information about this full file path.
+								
+								renameData = filenameReview.reviewPath(mainMovieFile)						# Run script to determine information about the path. Requires relative path for splitting.
+								print(renameData)
 
 
 

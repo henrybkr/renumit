@@ -10,7 +10,8 @@ import sys
 import re
 sys.path.insert(1, r'\app\scripts')
 sys.path.insert(1, r'\app\api')
-import utilities # pylint: disable=import-error
+sys.path.insert(1, r'\app\sorting')
+import utilities, mediaInfoReview # pylint: disable=import-error
 from datetime import date
 
 # Attempt to collect a name and year from a path
@@ -66,10 +67,7 @@ def getYear(path, debug):
 	
 	# Will return either a valid number or 0, indicating fail (and a error)
 	return (year, error)
-		
 
-	
-	
 def getName(path, debug, year=None):
 
 	try:
@@ -83,3 +81,77 @@ def stripBadCharacters(x):
 	# This function should be used to remove specific characters from an input and return it.
 	
 	return x
+
+def reviewPath(inputPath):
+
+	path = (inputPath.split("\\")[-2])+"\\"+((inputPath.split("\\"))[-1])				# Note, this might pose issues later. It finds the parent directory and the main movie file (+ extension) used for reference
+	altPath = path.replace(".", " ")
+
+	# First attempt to collect info with the original path
+	edition = getEdition(path)
+	source = getSource(path)
+	mediaInfoData = mediaInfoReview.basicInfo(inputPath)
+	print(mediaInfoData)
+	
+
+	# If any failed returns, attempt with the alt paths (periods replaced with spaces)
+	if not edition:
+		getEdition(altPath)
+	if not source:
+		getSource(altPath)
+	
+
+	return {'edition': edition, 'source': source}
+
+# Function to collect edition information from a provided path if available
+def getEdition(path):
+	ref = path.lower().replace("-"," ")
+	edition = False
+
+	if (" criterion " in ref):
+		edition = "Criterion"
+	elif (" extended " in ref):
+		edition = "Extended"
+	elif (" rm4k " in ref) or ("4k remastered" in ref) or ("4k remaster" in ref) or (") rm (" in ref):
+		edition = "Remastered"
+	elif (" unrated " in ref):
+		edition = "Unrated"
+	elif (") dc " in ref) or (" dc (" in ref) or ("directors cut" in ref) or ("director's cut" in ref):
+		edition = "Directors Cut"
+	elif ("anniversary edition" in ref) or (" anniv" in ref) or (" anniversary" in ref):
+		# anniversary edition. Collect XXth value
+		try:
+			num = re.findall(r" \d\dth ",ref)
+			edition = str(num[0])[1:-1]+" Anniversary Edition"
+		except:
+			edition = "Anniversary Edition"
+	elif (") se " in ref):
+		edition = "Special Edition"
+	elif (") ce " in ref):
+		edition = "Collectors Edition"
+	elif (" imax " in ref):
+		edition = "IMAX"
+	elif (" open matte " in ref):
+		edition = "Open Matte"
+	elif (") diamond (" in ref):
+		edition = "Diamond Edition"
+	elif (" final cut " in ref):
+		edition = "Final Cut"
+	
+	return edition
+
+# Function to collect source information from a provided path if available
+def getSource(path):
+	ref = path.lower()		# Lowercase for easier querying
+	
+	if ("bluray" in ref) or ("bdrip" in ref) or ("blu ray" in ref) or (" bd " in ref) or ("blu-ray" in ref):
+		return "Blu-Ray"
+	if ("hddvd" in ref) or ("hd-dvd" in ref):
+		return "HDDVD"
+	elif ("dvd" in ref) or ("dvdrip" in ref) or ("dvd-rip" in ref):
+		return "DVD"
+	elif ("web-dl" in ref) or ("web dl" in ref) or ("web x265" in ref) or ("web x264" in ref) or ("webrip" in ref) or ("web-rip" in ref) or ("web h.264" in ref) or ("web h.265" in ref):
+		return "WEB"
+	else:
+		return False
+	

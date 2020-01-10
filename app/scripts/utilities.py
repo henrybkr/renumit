@@ -129,3 +129,15 @@ def reportErrors(filePaths, invalidPaths, renameErrors):
 			print(AsciiTable(invalidTableData, "Invalid Paths").table)			# Print the table of errors
 		if renameErrors:
 			print(AsciiTable(renameErrorTableData, "Rename Errors").table)		# Print the table of errors
+
+# Output the full list of confirmed names/years in table format
+def nameYearTable(array):
+	try:
+		if array[0]:
+			tableData = []
+			for y in array:
+				tableData.append([y['title'], y['year']])
+			print("\n"+AsciiTable(tableData, "Confirmed Name/Years").table+"\n")		# Print the table
+	except:
+		print("Warning -- Error with nameYearTable function.")
+
