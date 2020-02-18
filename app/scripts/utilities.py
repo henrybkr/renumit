@@ -13,7 +13,7 @@ clear_win = lambda: os.system('cls')											# Empty (windows) cmd window
 
 # Function to output an optional introduction to the tool. Returns the list of filepaths provided if any.
 def intro(filePaths=None):
-	print(line+"\n----------- Welcome to Renumit, a tool used for renaming media files -----------\n"+line+"\n")			# Output introduction to user.
+	print(line+"\n-- Welcome to Renumit, a tool used for renaming media files --------------------\n"+line+"\n")			# Output introduction to user.
 	
 	# Check if the user has provided filepaths to the application.
 	if filePaths:
@@ -98,9 +98,8 @@ def confirm(message):
 
 # Function to read all paths from a set of given lists if they exist.
 def pathValidityDebug(validPaths, invalidPaths):
-	print("\n\nFILE PATH REVIEW:\n"+line)
 	if validPaths:
-		print("\nValid Paths:\n"+line)
+		print("\nDebug -- Valid Paths:\n"+line)
 		for filePath in validPaths:
 			print(filePath)	
 	if invalidPaths:
@@ -137,7 +136,11 @@ def nameYearTable(array):
 			tableData = []
 			for y in array:
 				tableData.append([y['title'], y['year']])
-			print("\n"+AsciiTable(tableData, "Confirmed Name/Years").table+"\n")		# Print the table
+			
+			temp = tableData
+			temp.insert(0,['\nTitle\n','\nYear\n'])
+			print("\n"+AsciiTable(temp, "Confirmed Renames").table+"\n")		# Print the table
 	except:
 		print("Warning -- Error with nameYearTable function.")
+
 

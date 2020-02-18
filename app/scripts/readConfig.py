@@ -9,7 +9,7 @@
 import sys
 sys.path.insert(1, r'\app\scripts')
 import utilities
-import json
+import json, os
 
 # Read from the config file if it exists, else generate it.
 def read(path):
@@ -75,13 +75,21 @@ def read(path):
 				keywordsToStrip=split_temp.split(';')														# Split into list separating string by semicolon.
 				
 			
+					
 			
+
 			# Check values are acceptable.
 			if (utilities.checkExist(sortedDir) is False):
 				if utilities.confirm('"Your desired output folder '+sortedDir+'" does not exist, attempt to create it?'):
 					os.makedirs(sortedDir, mode=0o777, exist_ok=False)										# Create content directory
+				else:
+					raise Exception("Error -- You've opted not to create a new folder. Exception triggered as we cannot continue without an output location.")
+					## Need some error handling here
+					
 				if (utilities.checkExist(sortedDir) is False):
 					raise Exception('Tried to create this directory, but failed.') 							# Raise exception when failed to create requested directory.
+			
+			# Check match ratio
 			if matchRatio > 1:
 				raise Exception('Ratio is not formatted correctly. 0-1 and one decimal point only.') 		# Raise exception when match ratio is used incorrectly.
 			

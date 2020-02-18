@@ -13,11 +13,15 @@ This is another personal project this time making use of python to build a CLI b
 
 This is a re-write of an existing functional, yet messy application. The idea is to make the existing app more modular and readable in order to improve chances of later extending it's functionality.
 
+## Usage
+> renumit.py "path/to/your/media"
+
 ## Current Features
 * Interaction with the [TMDb](https://www.themoviedb.org/) API
 * Configurable user preferences
+* Able to accept file path or directories and input
 * Duplication helper utility
-* Basic menu launched when not launched with parameters
+* Basic menu launched when launched without parameters
 * Run basic api call tests to confirm api is reachable
 
 ## Features in Progress

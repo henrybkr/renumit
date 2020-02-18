@@ -91,7 +91,7 @@ def reviewPath(inputPath):
 	edition = getEdition(path)
 	source = getSource(path)
 	mediaInfoData = mediaInfoReview.basicInfo(inputPath)
-	print(mediaInfoData)
+	##print(mediaInfoData)
 	
 
 	# If any failed returns, attempt with the alt paths (periods replaced with spaces)

@@ -36,7 +36,7 @@ sys.path.insert(1, r'app\history')
 sys.path.insert(1, r'app\scripts')
 sys.path.insert(1, r'app\sorting')
 
-import utilities, readConfig, configCheck, filenameReview, renamer, tmdbHelper # pylint: disable=import-error
+import utilities, readConfig, configCheck, filenameReview, renamer, tmdbHelper, mediaInfoReview # pylint: disable=import-error
 
 #########################
 # Global variables, testing only:
@@ -46,47 +46,52 @@ testMode = True
 # Application run order:
 try:
 	utilities.clear_win()																										# Clear the window on first launch.
-	filePaths = utilities.intro(sys.argv[1:])																					# Run intro and review potential file paths provided to app
+	filePaths = utilities.intro(sys.argv[1:])																					# Run intro and review potential file paths provided to app.
 	
 	mainDir = os.path.dirname(os.path.abspath(__file__))
-	configJSON = readConfig.read(mainDir)													# Collect config json.
+	configJSON = readConfig.read(mainDir)																						# Collect config json.
 	configData = json.loads(configJSON)
 	apiKeychain = []
-	debugMode = False																											# Empty now but used for what API's are working
+	debugMode = False																											# Set to false but later overwritten.
 
 	if not(configJSON):
 		print("-- Hmm, problem with your configuration settings!")
 	else:
-		print("-- Config file loaded ----------------------------------------------------------")
 		utilities.writeLine()
+		print("-- Config file loaded ----------------------------------------------------------")
 		
-		# Confirm api keys work
-		apiCheckResult = configCheck.apiKeyAvailable(configData['apiKeys'])														# Launch apiKeyAvailable function
+		apiCheckResult = configCheck.apiKeyAvailable(configData['apiKeys'])														# Confirm api keys work.
+															
+		debugMode = bool(configData['debugMode'])																				# Enable debug flag if in config data.
 		
-		# Enable debug flag if required														
-		debugMode = bool(configData['debugMode'])
 		
-		if apiCheckResult[0] == 0:
-			# No keys present, fail.
-			print(apiCheckResult[1])
+		if not apiCheckResult[0]:
+			print("\n-- Critical Error: No API keys available. Please add at least one to preferences.config.")
 		else:
 			# If at least one api key is found, test which ones are working.
-			print(apiCheckResult[1])																							# Output api key info
+			if debugMode:
+				print(apiCheckResult[1])																						# Output api key info.
 
 			# Now lets check that the keys are functional.
 			tmdbWorking = configCheck.apiTest("tmdb", configData['apiKeys'][0]['key'], debugMode)
 			tvdbWorking = configCheck.apiTest("tvdb", configData['apiKeys'][1]['key'], debugMode)
 			omdbWorking = configCheck.apiTest("omdb", configData['apiKeys'][2]['key'], debugMode)
 
+			
+
+
+				
+
 			# Currently focusing on tmdb. Should consider how to add support for others later.
 			#   Example: read config for preferred api-only or preferred order (might fail to find a title with one?)
-			if tmdbWorking:
-				# Produce a menu to the user if no file paths provided.
-				if not filePaths:
-					utilities.beginMenu()
-							
-				# Otherwise, begin making use of file paths.
-				else:
+			
+			# Produce a menu to the user if no file paths provided.
+			if not filePaths:
+				utilities.beginMenu()
+			else:
+			
+				## Start with TMDB
+				if tmdbWorking:	
 					
 					# Initialise some variables that we'll use later:
 
@@ -117,47 +122,65 @@ try:
 					
 					# Once the preliminary checks are complete, move onto actual sorting						
 					for path in validPaths:
-						sortingResult = renamer.sorter(path, debugMode)
+						getNameYear_result = renamer.getNameYear(path, debugMode)
 				
-						if sortingResult[0] == False:
-							print("\n-- Error: "+sortingResult[1])
+						if getNameYear_result[0] == False:
+							print("\n-- Error: "+getNameYear_result[1])
 							print("'"+currentPath+"'\n")
 						else:
 							inputPathsProcessedCount+=1						# Increment the processed path count.
 							nameYearsArray.append({
-								'title':sortingResult[2],
-								'year':sortingResult[3]
+								'title':getNameYear_result[2],
+								'year':getNameYear_result[3]
 								})
 
 					utilities.nameYearTable(nameYearsArray)					# Output list of expected valid name/years we'll be processing
 					
 					utilities.writeLine()
 
+					pathMainContentList = []								# Empty list to be used to store potential "main" files (movie)
 					for path in validPaths:
 						mainMovieFileLocated = False
-						myPath = re.sub(r'([\[\]])','[\\1]',path)														# Note to self, glob doesn't seem to like square brackets, so removing seems to do the trick
-						pathMainContentList = [f for f in glob.glob(myPath + "**/*.*", recursive=True)]					# Collect a full list of all files in the main directory
-						
-						# In the event of more than one "main" file being located...
-						if len(pathMainContentList) > 1:
-							for x in pathMainContentList:
-								if not ".mkv" in x or not ".mp4" in x:
-									pathMainContentList.remove(x)														# Remove non video files from the array if any exist.
 
-							# Check to see if still more than one video file remains in the list
-							if not len(pathMainContentList) > 1:
-								renameErrors.append({'path': path, 'error': "More than one file in main directory"})	# Report back and error about multiple video files in main movie directory.
-							else:
+						# First check if the provided path itself has a container (.mkv)
+						if os.path.isfile(path):
+							# confirm if path is a mkv/mp4 file
+							if ".mkv" in path or not ".mp4" in path:
 								mainMovieFileLocated = True
-						elif len(pathMainContentList) == 0:
-							renameErrors.append({'path': path, 'error': "No main file found. Potential empty folder"})	# Report back issue with finding the "main" media file.
-						
+								pathMainContentList.append(path)
+							else:
+								renameErrors.append({'path': path, 'error': "Bad file. Appears to be a non-media file."})	# Report back and error about multiple video files in main movie directory.
+							
+						# If the path is a directory
+						elif (os.path.isdir(path)):
+							myPath = re.sub(r'([\[\]])','[\\1]',path)														# Note to self, glob doesn't seem to like square brackets, so removing seems to do the trick
+							pathMainContentList = [f for f in glob.glob(myPath + "**/*.*", recursive=True)]					# Collect a full list of all files in the main directory
+							
+							# In the event of more than one "main" file being located...
+							if len(pathMainContentList) > 1:
+								for x in pathMainContentList:
+									if not ".mkv" in x or not ".mp4" in x:
+										pathMainContentList.remove(x)														# Remove non video files from the array if any exist.
+
+								# Check to see if still more than one video file remains in the list
+								if not len(pathMainContentList) > 1:
+									renameErrors.append({'path': path, 'error': "More than one file in main directory"})	# Report back and error about multiple video files in main movie directory.
+								else:
+									mainMovieFileLocated = True
+							elif len(pathMainContentList) == 0:
+								renameErrors.append({'path': path, 'error': "No main file found. Potential empty folder"})	# Report back issue with finding the "main" media file.
+							
+							else:
+								# Only one "main" file found in the directory (good!)
+								mainMovieFileLocated = True
+						# Error handling, output error.
 						else:
-							# Only one "main" file found in the directory (good!)
-							mainMovieFileLocated = True
+							print("Warning -- Issue detecting if path is a file or a directory.")
 					
 						# Will only continue if the main movie file is located.
-						if mainMovieFileLocated:
+						if not mainMovieFileLocated:
+							print("Warning -- Looks like we can't find a main file for this path. Needs debugging.")
+						else:
 							try:
 								mainMovieFile = pathMainContentList[0]
 							except:
@@ -168,13 +191,28 @@ try:
 								# Now begin to collect information about this full file path.
 								
 								renameData = filenameReview.reviewPath(mainMovieFile)						# Run script to determine information about the path. Requires relative path for splitting.
-								print(renameData)
+								mediaInfoData = mediaInfoReview.basicInfo(mainMovieFile)
+								
+								if debugMode:
+									print("renameData = ",renameData)
+									print("mediaInfoData = ",mediaInfoData)
+
+								print("ok, now we build a new folder structure for the movie...")
+
+								# Output directory has been confirmed previously so no need to check again.
+								## NOTE TO SELF
+								##
+								## This isn't dynamic yet and needs work.
+								##
+								fullOutputDir = configData['sortedDirectory']+"\\"+nameYearsArray[0]['title']+" ("+nameYearsArray[0]['year']+") "+renameData['source']
+								print(fullOutputDir)
+								
 
 
 
 					# Launch the error report functionality. Only displays errors if there are any.
 					utilities.reportErrors(filePaths, invalidPaths, renameErrors)
-				
+			
 			
 	
 	# End of application

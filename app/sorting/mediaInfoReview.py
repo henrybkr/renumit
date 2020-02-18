@@ -17,7 +17,7 @@ def get(path):											# Function to produce a mediainfo text output as a stri
 	dirname = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 	mediainfoDir = dirname+"\\binaries\MediaInfo.exe"
 	
-	print(mediainfoDir)
+	#print(mediainfoDir)
 
 	# Subprocess the mediainfo executable and retrieve the result as a string.
 	proc = subprocess.Popen(mediainfoDir+' "{}"'.format(path), stdout=subprocess.PIPE)
@@ -94,12 +94,12 @@ def basicInfo(path):
 		if "Scan type                                :" in videoInfo:
 			readScanType = videoInfo.split("\nScan type                                : ", 1)[1].split("\n", 1)[0]
 			if "Progressive" in readScanType:
-				scanType = "p"
+				scanType = "progressive"
 			elif "Interlaced" in readScanType:
-				scanType = "i"
+				scanType = "interlaced"
 			else:
 				# Might need to revisit this later. For now, assuming interlaced if cannot find "progressive"
-				scanType = "i"
+				scanType = "interlaced"
 		else:
 			# Some codecs don't include this kind of data. Additional checks may be required.
 			# Further improvements should be made here for additional codecs

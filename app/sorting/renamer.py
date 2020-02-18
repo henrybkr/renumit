@@ -27,7 +27,7 @@ def pathValid(inputPath):
 	
 	
 
-def sorter(inputPath, debugMode):
+def getNameYear(inputPath, debugMode):
 	error = False
 	
 	# At this point, we are assuming the path exists.
