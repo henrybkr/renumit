@@ -134,11 +134,13 @@ try:
 								'year':getNameYear_result[3]
 								})
 
-					utilities.nameYearTable(nameYearsArray)					# Output list of expected valid name/years we'll be processing
+					utilities.nameYearTable(nameYearsArray)					# Output list of expected valid name/years we'll be processing.
 					
 					utilities.writeLine()
 
-					pathMainContentList = []								# Empty list to be used to store potential "main" files (movie)
+					pathMainContentList = []								# Empty list to be used to store potential "main" files (movie).
+
+					i = 0													# Used for getting the name and year from array. 
 					for path in validPaths:
 						mainMovieFileLocated = False
 
@@ -182,7 +184,7 @@ try:
 							print("Warning -- Looks like we can't find a main file for this path. Needs debugging.")
 						else:
 							try:
-								mainMovieFile = pathMainContentList[0]
+								mainMovieFile = pathMainContentList[i]
 							except:
 								print("Warning -- Issue selecting main content file")
 							
@@ -190,11 +192,11 @@ try:
 							if mainMovieFile:
 								# Now begin to collect information about this full file path.
 								
-								renameData = filenameReview.reviewPath(mainMovieFile)						# Run script to determine information about the path. Requires relative path for splitting.
+								filenameData = filenameReview.reviewPath(mainMovieFile)						# Run script to determine information about the path. Requires relative path for splitting.
 								mediaInfoData = mediaInfoReview.basicInfo(mainMovieFile)
 								
 								if debugMode:
-									print("renameData = ",renameData)
+									print("filenameData = ",filenameData)
 									print("mediaInfoData = ",mediaInfoData)
 
 								print("ok, now we build a new folder structure for the movie...")
@@ -204,8 +206,13 @@ try:
 								##
 								## This isn't dynamic yet and needs work.
 								##
-								fullOutputDir = configData['sortedDirectory']+"\\"+nameYearsArray[0]['title']+" ("+nameYearsArray[0]['year']+") "+renameData['source']
-								print(fullOutputDir)
+
+								newFilename = renamer.getNewFilename(configData,nameYearsArray[i],filenameData, mediaInfoData)
+								newDir = renamer.getNewDirName(configData,nameYearsArray[i],filenameData, mediaInfoData)
+
+								
+								print(newDir+r"/"+newFilename)
+						i+=1																				# Finish this loop by incrementing the reference number variable 
 								
 
 

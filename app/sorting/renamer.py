@@ -59,3 +59,17 @@ def getNameYear(inputPath, debugMode):
 			print('Movie Title -- '+title+' -- no valid year found')
 
 	return (True, error, title, year)
+
+
+# Function to get an output directory based on the user config and details we have at hand
+def getNewFilename(configJSON, nameYearList, filenameData, mediaInfoData):
+
+	newOutputFilename = nameYearList['title']+" ("+nameYearList['year']+") "+str(mediaInfoData['height'])+mediaInfoData['scanType']+" "+mediaInfoData['codec']+" "+filenameData['source']
+
+	return newOutputFilename
+
+def getNewDirName(configJSON, nameYearList, filenameData, mediaInfoData):
+
+	newDirName = nameYearList['title']+" ("+nameYearList['year']+")"
+
+	return newDirName
