@@ -111,23 +111,23 @@ def pathValidityDebug(validPaths, invalidPaths):
 	print("\nReady to continue?\n")
 	os.system("pause")
 
-def reportErrors(filePaths, invalidPaths, renameErrors):
+def reportErrors(filePaths, invalidPaths, sortingErrors):
 	# Report errors from the related error arrays if errors exist.
 
-	if invalidPaths or renameErrors:											# Only continue if any errors actually exist.
+	if invalidPaths or sortingErrors:											# Only continue if any errors actually exist.
 		print("\nWhoops, looks like we've got some errors...\n")				# Generic user feedback
 		invalidTableData, renameErrorTableData = [], []							# Table data lists
 		# invalidPaths first
 		for i in invalidPaths:
 			invalidTableData.append([i,"Path invalid"])							# Includes a generic invalid path message. Might need revisiting later if multiple invalid filepath possibilities (read errors, etc)
 		# Now for rename errors
-		for r in renameErrors:
+		for r in sortingErrors:
 			renameErrorTableData.append([r['path'], r['error']])				# Include both the path and the error
 		# Now let's look at displaying the error results to the user
 		if invalidPaths:
 			print(AsciiTable(invalidTableData, "Invalid Paths").table)			# Print the table of errors
-		if renameErrors:
-			print(AsciiTable(renameErrorTableData, "Rename Errors").table)		# Print the table of errors
+		if sortingErrors:
+			print(AsciiTable(renameErrorTableData, "Sorting Errors").table)		# Print the table of errors
 
 # Output the full list of confirmed names/years in table format
 def nameYearTable(array):
@@ -144,3 +144,8 @@ def nameYearTable(array):
 		print("Warning -- Error with nameYearTable function.")
 
 
+def deleteOrIgnore(config, debug, x):
+	if config['deleteNonVideos']:
+		print("--> Run code to delete -->" + "'" + x + "'")
+	else:
+		print("--> User config says we don't need to delete --> " + "'" + x + "'")

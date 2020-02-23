@@ -27,6 +27,7 @@ def read(path):
 	removeCoverTitles = False
 	keyword_strip = False
 	keywordsToStrip = []
+	deleteNonVideos = False
 	
 	
 	# First step, check that an existing config file exists
@@ -58,6 +59,8 @@ def read(path):
 			
 			matchRatio = float(config_data[9].split('match_rate = "')[1].split('"')[0])						# Collect match ratio, convert to float
 			
+
+			# General Settings
 			if (config_data[10].lower().find("true") != -1):												# Determine if debug mode should enabled
 				debug = True
 			if (config_data[11].lower().find("true") != -1):												# Determine if only mkvs should be retained
@@ -66,13 +69,19 @@ def read(path):
 				sortedDir = config_data[12].split('sorted_location = "')[1].split('"')[0]
 			if (config_data[13].lower().find("true") != -1):												# Config to remove mkv covers
 				removeCoverTitles = True
+			if (config_data[14].lower().find("true") != -1):												# Determine if non-video type files should be deleted (true) or just skipped (false)
+				deleteNonVideos = True
+
+
 			# Read from personalisation section
-			if (config_data[16].lower().find("true") != -1):
-				
+			if (config_data[18].lower().find("true") != -1):
 				keyword_strip = True			# Set to true
 				
-				split_temp = config_data[17].split('keywords = "')[1].split('"')[0]							# Get the full string between quotation marks.
+				split_temp = config_data[19].split('keywords = "')[1].split('"')[0]							# Get the full string between quotation marks.
 				keywordsToStrip=split_temp.split(';')														# Split into list separating string by semicolon.
+
+			# Read from rename settings
+			spaceCharacter = config_data[23].split('space_character = "')[1].split('"')[0]
 				
 			
 					
@@ -132,6 +141,11 @@ def read(path):
 			a['removeCoverTitles'] = removeCoverTitles
 			a['sortedDirectory'] = sortedDir
 			a['keywordsToStrip'] = keywordsToStrip
+			a['deleteNonVideos'] = deleteNonVideos
+
+			# Rename settings
+			a['spaceCharacter'] = spaceCharacter
+
 
 			# Return in json format
 			jsonOutput = json.dumps(a)

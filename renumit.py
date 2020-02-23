@@ -4,14 +4,6 @@
 ## ~ A Python script used for querying databases and renaming media accordingly based on personal preference and        ##
 ##   support for the Plex media servers.                                                                                ##
 ##                                                                                                                      ##
-## ? What it does:                                                                                                      ##
-##                                                                                                                      ##
-## + Allows for user configuration via external file. Autogenerates when it doesn't exist. Example; match ratio.		##
-## + Matches main content (Movie only currently) to a name and year. Other data often available not yet used.			##
-## + Debug mode for individual comparison and confirmation before renaming.												##
-## + Offers to create the desired output directory if it doesn't already exist.											##
-## + Finds the main movie file even when there is more than one file in the main directory.								##
-##                                                                                                                      ##
 ## ! Ideas/Issues/Concerns:                                                                                             ##
 ##                                                                                                                      ##
 ## - When more than one mkv in main directory, assuming that largest is the main content. Might be a problem.			##
@@ -94,14 +86,12 @@ try:
 				if tmdbWorking:	
 					
 					# Initialise some variables that we'll use later:
-
 					validPaths, invalidPaths = [], []
 					inputPathsProcessedCount = 0     				# Count used to track how many input directories (parametors) have been processed.
 					processedFileCount = 0							# Same as above but for files.
 
 					# Error lists
-
-					cleanupPaths, renameErrors, nameYearsArray, renameArray = [],[],[],[]		# Lists for holding paths about errors, clean up errors, rename errors and the planned renames.
+					cleanupPaths, sortingErrors, nameYearsArray, renameArray = [],[],[],[]		# Lists for holding paths about errors, clean up errors, rename errors and the planned renames.
 
 					# Run preliminary checks
 					for currentPath in filePaths:
@@ -151,7 +141,7 @@ try:
 								mainMovieFileLocated = True
 								pathMainContentList.append(path)
 							else:
-								renameErrors.append({'path': path, 'error': "Bad file. Appears to be a non-media file."})	# Report back and error about multiple video files in main movie directory.
+								sortingErrors.append({'path': path, 'error': "Bad file. Appears to be a non-media file."})	# Report back and error about multiple video files in main movie directory.
 							
 						# If the path is a directory
 						elif (os.path.isdir(path)):
@@ -160,17 +150,24 @@ try:
 							
 							# In the event of more than one "main" file being located...
 							if len(pathMainContentList) > 1:
+
 								for x in pathMainContentList:
-									if not ".mkv" in x or not ".mp4" in x:
+									
+									if not (".mkv" in x or ".mp4" in x):										
+										utilities.deleteOrIgnore(configData, debugMode, x);									# Run the function to decide what to do with the non-video filetype, depending on user settings.
 										pathMainContentList.remove(x)														# Remove non video files from the array if any exist.
 
 								# Check to see if still more than one video file remains in the list
-								if not len(pathMainContentList) > 1:
-									renameErrors.append({'path': path, 'error': "More than one file in main directory"})	# Report back and error about multiple video files in main movie directory.
+								if len(pathMainContentList) != 1:
+									print("updated list = ")
+									print(pathMainContentList)
+									sortingErrors.append({'path': path, 'error': "More than one file in main directory"})	# Report back and error about multiple video files in main movie directory.
 								else:
+									if debugMode:
+										print("Located a single 'main' file")
 									mainMovieFileLocated = True
 							elif len(pathMainContentList) == 0:
-								renameErrors.append({'path': path, 'error': "No main file found. Potential empty folder"})	# Report back issue with finding the "main" media file.
+								sortingErrors.append({'path': path, 'error': "No main file found. Potential empty folder"})	# Report back issue with finding the "main" media file.
 							
 							else:
 								# Only one "main" file found in the directory (good!)
@@ -195,9 +192,7 @@ try:
 								filenameData = filenameReview.reviewPath(mainMovieFile)						# Run script to determine information about the path. Requires relative path for splitting.
 								mediaInfoData = mediaInfoReview.basicInfo(mainMovieFile)
 								
-								if debugMode:
-									print("filenameData = ",filenameData)
-									print("mediaInfoData = ",mediaInfoData)
+								
 
 								print("ok, now we build a new folder structure for the movie...")
 
@@ -207,18 +202,16 @@ try:
 								## This isn't dynamic yet and needs work.
 								##
 
-								newFilename = renamer.getNewFilename(configData,nameYearsArray[i],filenameData, mediaInfoData)
-								newDir = renamer.getNewDirName(configData,nameYearsArray[i],filenameData, mediaInfoData)
-
+								newNames = renamer.getNames(configData,nameYearsArray[i],filenameData, mediaInfoData)
 								
-								print(newDir+r"/"+newFilename)
+								print(newNames['directory']+r"/"+newNames['filename'])
 						i+=1																				# Finish this loop by incrementing the reference number variable 
 								
 
 
 
 					# Launch the error report functionality. Only displays errors if there are any.
-					utilities.reportErrors(filePaths, invalidPaths, renameErrors)
+					utilities.reportErrors(filePaths, invalidPaths, sortingErrors)
 			
 			
 	

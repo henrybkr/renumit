@@ -25,7 +25,7 @@ def pathValid(inputPath):
 	else:
 		return (True, error)
 	
-	
+
 
 def getNameYear(inputPath, debugMode):
 	error = False
@@ -61,15 +61,18 @@ def getNameYear(inputPath, debugMode):
 	return (True, error, title, year)
 
 
-# Function to get an output directory based on the user config and details we have at hand
-def getNewFilename(configJSON, nameYearList, filenameData, mediaInfoData):
+# Function to get output filenames and directory names based on the user config and details we have at hand
+def getNames(configJSON, nameYearList, filenameData, mediaInfoData):
+	
+	space = configJSON['spaceCharacter']
 
-	newOutputFilename = nameYearList['title']+" ("+nameYearList['year']+") "+str(mediaInfoData['height'])+mediaInfoData['scanType']+" "+mediaInfoData['codec']+" "+filenameData['source']
+	#newDir = nameYearList['title']+space+"("+str(nameYearList['year'])+")"	
+	
+	newOutputFilename = str(mediaInfoData['height'])+mediaInfoData['scanType']+space+mediaInfoData['codec']+space+filenameData['edition']+space+filenameData['source']
+	
+	if space == ".":
+		newDirName = nameYearList['title']+space+nameYearList['year']
+	else:
+		newDirName = nameYearList['title']+" ("+nameYearList['year']+")"
 
-	return newOutputFilename
-
-def getNewDirName(configJSON, nameYearList, filenameData, mediaInfoData):
-
-	newDirName = nameYearList['title']+" ("+nameYearList['year']+")"
-
-	return newDirName
+	return {'directory': newDirName, 'filename': newOutputFilename}
