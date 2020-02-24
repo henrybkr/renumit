@@ -69,23 +69,20 @@ def read(path):
 				sortedDir = config_data[12].split('sorted_location = "')[1].split('"')[0]
 			if (config_data[13].lower().find("true") != -1):												# Config to remove mkv covers
 				removeCoverTitles = True
-			if (config_data[14].lower().find("true") != -1):												# Determine if non-video type files should be deleted (true) or just skipped (false)
-				deleteNonVideos = True
-
+			temp_nonvid = config_data[15].split('non_video_files = "')[1].split('"')[0]						# Determine if non-video type files should be sorted, deleted, recycled or skipped.
+			temp_bonus_folder = config_data[16].split('bonus_folder_name = "')[1].split('"')[0]
 
 			# Read from personalisation section
-			if (config_data[18].lower().find("true") != -1):
-				keyword_strip = True			# Set to true
+			if (config_data[20].lower().find("true") != -1):
+				keyword_strip = True																			# Set to true
 				
-				split_temp = config_data[19].split('keywords = "')[1].split('"')[0]							# Get the full string between quotation marks.
+				split_temp = config_data[21].split('keywords = "')[1].split('"')[0]							# Get the full string between quotation marks.
 				keywordsToStrip=split_temp.split(';')														# Split into list separating string by semicolon.
 
 			# Read from rename settings
-			spaceCharacter = config_data[23].split('space_character = "')[1].split('"')[0]
-				
-			
-					
-			
+			spaceCharacter = config_data[25].split('space_character = "')[1].split('"')[0]
+
+
 
 			# Check values are acceptable.
 			if (utilities.checkExist(sortedDir) is False):
@@ -98,32 +95,21 @@ def read(path):
 				if (utilities.checkExist(sortedDir) is False):
 					raise Exception('Tried to create this directory, but failed.') 							# Raise exception when failed to create requested directory.
 			
+			# Check non-video string is acceptable
+			if temp_nonvid == "sort" or temp_nonvid == "skip" or temp_nonvid == "delete" or temp_nonvid == "recycle":
+				nonVideoFiles = temp_nonvid
+			else:
+				print("Info -- Config: Unknown option for dealing with non-media files. Defaulting to skip.")
+				nonVideoFiles = "skip"																		# Default to skip if preferences don't match a string.
+			if temp_bonus_folder != "":
+				bonusFolderName = temp_bonus_folder
+			else:
+				print("Info -- Config: Bonus folder string is not defined. Defaulting to 'Featurettes' for bonus output directory.")
+				bonusFolderName = "Featurettes"																# Default "Featurettes" if no folder name given
+
 			# Check match ratio
 			if matchRatio > 1:
 				raise Exception('Ratio is not formatted correctly. 0-1 and one decimal point only.') 		# Raise exception when match ratio is used incorrectly.
-			
-
-			#Currently not needed. Potential debug mode feature.
-			"""
-			# Check if all API keys are present.	
-			num = 0
-			for x in apiKeys:
-				if x is not "":
-					num+=1																					# Itterate num value by 1 (number of api keys found)
-			if num == len(apiKeys):																			# If all keys are found
-				print(utilities.line+"\n--------------------- Config file loaded - All keys found! ---------------------\n"+utilities.line+"\n")
-			elif (num == 0):
-				print(utilities.line+"\n---------------------- Config file loaded - 0 keys found! ----------------------")
-				raise Exception('No API keys present. Please make sure there is at least one!')
-			else:																							# If one ore more key missing
-				print(utilities.line+"\n--------------- Config file loaded - Missing "+str((len(apiKeys))-num)+" API key(s) though! --------------\n"+utilities.line+"\n")
-			
-			# Output full config info if this debug mode is enabled
-			if (debug):
-				print("full config text:\n")
-				for x in config_data:
-					print(x)
-			"""
 		
 			# Create the dict object and begin populating it with data to later return.
 			a = {}
@@ -141,7 +127,8 @@ def read(path):
 			a['removeCoverTitles'] = removeCoverTitles
 			a['sortedDirectory'] = sortedDir
 			a['keywordsToStrip'] = keywordsToStrip
-			a['deleteNonVideos'] = deleteNonVideos
+			a['nonVideoFiles'] = nonVideoFiles
+			a['bonusFolderName'] = bonusFolderName
 
 			# Rename settings
 			a['spaceCharacter'] = spaceCharacter

@@ -17,15 +17,8 @@ def pathValid(inputPath):
 		error = "Path provided does not exist"
 		return (False, error)
 
-	# elif something?
-	# Other checks, such as characters used are acceptable.
-	##
-	##
-
 	else:
 		return (True, error)
-	
-
 
 def getNameYear(inputPath, debugMode):
 	error = False
@@ -68,11 +61,80 @@ def getNames(configJSON, nameYearList, filenameData, mediaInfoData):
 
 	#newDir = nameYearList['title']+space+"("+str(nameYearList['year'])+")"	
 	
-	newOutputFilename = str(mediaInfoData['height'])+mediaInfoData['scanType']+space+mediaInfoData['codec']+space+filenameData['edition']+space+filenameData['source']
+	title		= utilities.addSpaces(nameYearList['title'],space)
+	year		= utilities.addSpaces(nameYearList['year'],space)
+	year_brackets		= utilities.addSpaces(("("+nameYearList['year']+")"),space)
+
+	resolution	= utilities.addSpaces((str(mediaInfoData['height'])+mediaInfoData['scanType']),space)
+	codec		= utilities.addSpaces(mediaInfoData['codec'],space)
+	edition		= utilities.addSpaces(filenameData['edition'],space)
+	source		= utilities.addSpaces(filenameData['source'],space)
+
+	newOutputFilename = (title+year_brackets+resolution+codec+edition+source).strip()
 	
 	if space == ".":
-		newDirName = nameYearList['title']+space+nameYearList['year']
+		newDirName = title+space+nameYearList['year']
 	else:
 		newDirName = nameYearList['title']+" ("+nameYearList['year']+")"
 
 	return {'directory': newDirName, 'filename': newOutputFilename}
+
+def getNewExtraPath(configJSON, debugMode, currentFullPath, confirmedNewFilename):
+	folder = configJSON['bonusFolderName']
+
+	path = currentFullPath.lower()
+
+
+	if ("\\deleted scenes\\" in path):
+		newFolderPath = "\\"+folder+"\\Deleted Scenes\\"
+	elif ("\\interviews\\" in path):
+		newFolderPath = "\\"+folder+"\\Interviews\\"
+	elif ("\\trailers\\" in path):
+		newFolderPath = "\\"+folder+"\\Trailers\\"
+	elif ("\\behind the scenes\\" in path):
+		newFolderPath = "\\"+folder+"\\Behind The Scenes\\"
+	elif ("\\featurettes\\" in path) or ("\\extra\\" in path) or ("\\extras\\" in path) or ("\\bonus\\" in path):
+		newFolderPath = "\\"+folder+"\\"
+	else:
+		if "mkv" in path:				# Skip if not a mkv file
+			if "main menu" in path:
+				newFolderPath = "\\"+folder+"\\"
+			elif "menu" in path:
+				newFolderPath = "\\"+folder+"\\"
+			elif "trailer" in path:
+				newFolderPath = "\\"+folder+"\\"
+			elif "promo.mkv" in path:
+				newFolderPath = "\\"+folder+"\\"
+			elif "extra.mkv" in path or "extras.mkv" in path:
+				newFolderPath = "\\"+folder+"\\"
+			elif debugMode:
+				if utilities.confirm("Having trouble with a file. Is '"+path+"' an extra?"):
+					newFolderPath = "\\Featurettes\\"
+				else:
+					skip = True
+			else:
+				newFolderPath = "\\Featurettes\\"	# Assume file is a featurette
+
+	
+	return newFolderPath+confirmedNewFilename
+
+# Function to check and potentially modify input filenames
+def checkFilename(configJSON, inputFilename):
+
+	## Here we should run a few things:
+
+	# - Checks for bad characters (non-english characters that might mess with a media database)
+	# - Remove keywords that the user has defined
+	# - etc
+
+	# Note, don't try to do everything here. Launch other functions here as each might get larger.
+
+	outputFilename = removePrefKeywords(configJSON, inputFilename)
+
+	return outputFilename
+
+def removePrefKeywords(configJSON, inputFilename):
+	
+	##
+
+	return inputFilename;

@@ -145,7 +145,18 @@ def nameYearTable(array):
 
 
 def deleteOrIgnore(config, debug, x):
-	if config['deleteNonVideos']:
+	conf = config['nonVideoFiles'].lower()
+	if conf == "delete":
 		print("--> Run code to delete -->" + "'" + x + "'")
+	elif conf == "recycle":
+		print("--> Run code to recycle -->" + "'" + x + "'")
+	elif conf == "recycle":
+		print("--> Run code to recycle -->" + "'" + x + "'")
 	else:
 		print("--> User config says we don't need to delete --> " + "'" + x + "'")
+
+def addSpaces(inputString, spaceChar):
+	if str(inputString) != "":
+		return str(inputString)+spaceChar
+	else:
+		return ""

@@ -89,6 +89,7 @@ try:
 					validPaths, invalidPaths = [], []
 					inputPathsProcessedCount = 0     				# Count used to track how many input directories (parametors) have been processed.
 					processedFileCount = 0							# Same as above but for files.
+					sortedDir = configData['sortedDirectory']
 
 					# Error lists
 					cleanupPaths, sortingErrors, nameYearsArray, renameArray = [],[],[],[]		# Lists for holding paths about errors, clean up errors, rename errors and the planned renames.
@@ -147,14 +148,13 @@ try:
 						elif (os.path.isdir(path)):
 							myPath = re.sub(r'([\[\]])','[\\1]',path)														# Note to self, glob doesn't seem to like square brackets, so removing seems to do the trick
 							pathMainContentList = [f for f in glob.glob(myPath + "**/*.*", recursive=True)]					# Collect a full list of all files in the main directory
-							
 							# In the event of more than one "main" file being located...
 							if len(pathMainContentList) > 1:
 
 								for x in pathMainContentList:
 									
 									if not (".mkv" in x or ".mp4" in x):										
-										utilities.deleteOrIgnore(configData, debugMode, x);									# Run the function to decide what to do with the non-video filetype, depending on user settings.
+										utilities.deleteOrIgnore(configData, debugMode, x)									# Run the function to decide what to do with the non-video filetype, depending on user settings.
 										pathMainContentList.remove(x)														# Remove non video files from the array if any exist.
 
 								# Check to see if still more than one video file remains in the list
@@ -181,32 +181,67 @@ try:
 							print("Warning -- Looks like we can't find a main file for this path. Needs debugging.")
 						else:
 							try:
-								mainMovieFile = pathMainContentList[i]
+								mainMovieFile = pathMainContentList[0]
 							except:
 								print("Warning -- Issue selecting main content file")
 							
 							# Only continue if main content is located.
 							if mainMovieFile:
-								# Now begin to collect information about this full file path.
+								# Now begin to collect information about this full file path and create new names
 								
-								filenameData = filenameReview.reviewPath(mainMovieFile)						# Run script to determine information about the path. Requires relative path for splitting.
+								filenameData = filenameReview.reviewPath(mainMovieFile)										# Run script to determine information about the path. Requires relative path for splitting.
 								mediaInfoData = mediaInfoReview.basicInfo(mainMovieFile)
+
+								newNames = renamer.getNames(configData,nameYearsArray[i],filenameData, mediaInfoData)		# Get folder and file names for the sort
 								
+								renameArray.append([mainMovieFile, (sortedDir+r"/"+newNames['directory']+r"/"+newNames['filename']), True])
+								
+								#print(newNames['directory']+r"/"+newNames['filename'])
+
+								# Now turn to additional files inside the directory. Collect all files listings and remove the "main" file
+
+								extraFiles = []																				# Empty list to hold all full file listings from the input path
+								for (current_path, dirs, files) in os.walk(validPaths[i]):
+									for file in files:
+										ext = os.path.splitext(file)[1]
+										#filename = os.path.splitext(file)[0].replace("."," ")
+										full_path = (current_path+"\\"+file)
+										extraFiles.append(full_path)
 								
 
-								print("ok, now we build a new folder structure for the movie...")
+								extraFiles.remove(mainMovieFile)															# Remove the "main" file from the full list of all files
+								#print(extraFiles)
 
-								# Output directory has been confirmed previously so no need to check again.
-								## NOTE TO SELF
-								##
-								## This isn't dynamic yet and needs work.
-								##
+								if len(extraFiles) > 0:
 
-								newNames = renamer.getNames(configData,nameYearsArray[i],filenameData, mediaInfoData)
+									# First check if we ignore or delete non-video files.
+
+									for y in extraFiles:
+										if not (".mkv" in y or ".mp4" in y):										
+											utilities.deleteOrIgnore(configData, debugMode, y)								# Run the function to decide what to do with the non-video filetype, depending on user settings.
+											extraFiles.remove(y)															# Remove non video files from the array if any exist.
+
+									# Now get new filenames for any bonus files that we plan to keep
+
+									for y in extraFiles:
+										onlyFile = os.path.basename(y)
+										confirmedFilename = renamer.checkFilename(configData, onlyFile)
+										#blah = os.path.splitext(y)[0]
+										#print(blah)
+										renameArray.append([y, (sortedDir+"\\"+newNames['directory']+"\\"+newNames['filename']+renamer.getNewExtraPath(configData, debugMode, y, confirmedFilename)), False])
+
 								
-								print(newNames['directory']+r"/"+newNames['filename'])
-						i+=1																				# Finish this loop by incrementing the reference number variable 
-								
+								#tempFiles.remove(mainMovieFile)
+
+								#print(tempFiles)
+
+						i+=1																								# Finish this loop by incrementing the reference number variable 
+						
+						utilities.writeLine()
+						print("Okay, let's have a look at the mess:")
+						utilities.writeLine()
+						for z in renameArray:
+							print(z[0]+" ---> "+z[1])
 
 
 

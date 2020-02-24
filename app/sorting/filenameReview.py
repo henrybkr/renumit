@@ -96,9 +96,9 @@ def reviewPath(inputPath):
 
 	# If any failed returns, attempt with the alt paths (periods replaced with spaces)
 	if not edition:
-		getEdition(altPath)
+		edition = getEdition(altPath)
 	if not source:
-		getSource(altPath)
+		source = getSource(altPath)
 	
 
 	return {'edition': edition, 'source': source}
@@ -106,7 +106,7 @@ def reviewPath(inputPath):
 # Function to collect edition information from a provided path if available
 def getEdition(path):
 	ref = path.lower().replace("-"," ")
-	edition = False
+	edition = ""
 
 	if (" criterion " in ref):
 		edition = "Criterion"
@@ -142,16 +142,19 @@ def getEdition(path):
 
 # Function to collect source information from a provided path if available
 def getSource(path):
-	ref = path.lower()		# Lowercase for easier querying
+
+	source = ""
+
+	ref = path.lower().replace("."," ")		# Lowercase for easier querying
 	
 	if ("bluray" in ref) or ("bdrip" in ref) or ("blu ray" in ref) or (" bd " in ref) or ("blu-ray" in ref):
-		return "Blu-Ray"
+		source = "Blu-Ray"
 	if ("hddvd" in ref) or ("hd-dvd" in ref):
-		return "HDDVD"
+		source = "HDDVD"
 	elif ("dvd" in ref) or ("dvdrip" in ref) or ("dvd-rip" in ref):
-		return "DVD"
+		source = "DVD"
 	elif ("web-dl" in ref) or ("web dl" in ref) or ("web x265" in ref) or ("web x264" in ref) or ("webrip" in ref) or ("web-rip" in ref) or ("web h.264" in ref) or ("web h.265" in ref):
-		return "WEB"
+		source = "WEB"
 	else:
-		return False
+		return source
 	
