@@ -237,11 +237,14 @@ try:
 
 						i+=1																								# Finish this loop by incrementing the reference number variable 
 						
-						utilities.writeLine()
-						print("Okay, let's have a look at the mess:")
-						utilities.writeLine()
-						for z in renameArray:
-							print(z[0]+" ---> "+z[1])
+					utilities.writeLine()
+					print("Okay, let's have a look at the mess:")
+					utilities.writeLine()
+					for z in renameArray:
+						if z[2]:
+							print(("\n"+utilities.get_color("yellow", z[0])+" ---> "+utilities.get_color("purple", z[1])))
+						else:
+							print(" → "+utilities.get_color("green", z[0])+" ---> "+utilities.get_color("yellow", z[1]))
 
 
 
