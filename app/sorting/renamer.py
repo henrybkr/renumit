@@ -9,6 +9,7 @@ import sys
 sys.path.insert(1, r'\app\scripts')
 sys.path.insert(1, r'\app\api')
 import utilities, filenameReview # pylint: disable=import-error
+import shutil
 
 # Run a handful of checks to confirm path is valid, otherwise report back the error.
 def pathValid(inputPath):
@@ -137,4 +138,25 @@ def removePrefKeywords(configJSON, inputFilename):
 	
 	##
 
-	return inputFilename;
+	return inputFilename
+
+def move(arrayElement):
+	response = False
+	error = ""
+
+	#print(arrayElement[0]+" ---> "+arrayElement[1])
+
+	if not utilities.checkExist(arrayElement[1]):
+		utilities.printColor("yellow", "Attempting to move...")
+		#shutil.move(arrayElement[0], arrayElement[1])											# Move the content to destination directory with new filename
+		if utilities.checkExist(arrayElement[1]):												# Confirm the newly moved file now exists
+			if utilities.checkExist(arrayElement[0]):											# Confirm the old file location is now gone
+				response = True																	# Set response to true when all conditions are met
+			else:
+				error = "Move attempted - The newly moved file exists but it still exists in the old location."
+		else:
+			error = "Move attempted - The newly moved file doesn't exist."
+	else:
+		error = "File already exists."
+	
+	return {'response': response, 'error': error}

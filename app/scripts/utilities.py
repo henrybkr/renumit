@@ -161,8 +161,9 @@ def addSpaces(inputString, spaceChar):
 	else:
 		return ""
 
-def print_color(color, string, debugMode, *args, **kwargs):					# Function to output string as a colour
+def printColor(color, string, *args, **kwargs):					# Function to output string as a colour
 	always = kwargs.get('always', False)
+	debugMode = kwargs.get('debugMode', False)
 	if (always is True) or (debugMode is True):
 		my_color = ""
 		if color is "green":
@@ -179,7 +180,7 @@ def print_color(color, string, debugMode, *args, **kwargs):					# Function to ou
 		if my_color != "":
 			print(my_color+string+"\033[0m")
 
-def get_color(color, string):
+def getColor(color, string):
 	my_color = ""
 	if color is "green":
 		my_color = "\033[1;32;40m"

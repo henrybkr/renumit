@@ -236,20 +236,35 @@ try:
 								#print(tempFiles)
 
 						i+=1																								# Finish this loop by incrementing the reference number variable 
-						
+
 					utilities.writeLine()
-					print("Okay, let's have a look at the mess:")
+					print(" -- Review: --")
 					utilities.writeLine()
 					for z in renameArray:
 						if z[2]:
-							print(("\n"+utilities.get_color("yellow", z[0])+" ---> "+utilities.get_color("purple", z[1])))
+							print(("\n"+utilities.getColor("yellow", z[0])+" ---> "+utilities.getColor("purple", z[1])))
 						else:
-							print(" → "+utilities.get_color("green", z[0])+" ---> "+utilities.get_color("yellow", z[1]))
-
+							print(" → "+utilities.getColor("green", z[0])+" ---> "+utilities.getColor("yellow", z[1]))
 
 
 					# Launch the error report functionality. Only displays errors if there are any.
 					utilities.reportErrors(filePaths, invalidPaths, sortingErrors)
+
+					utilities.writeLine()
+					if utilities.confirm("Ready to rename?"):
+						utilities.writeLine()
+
+						for r in renameArray:
+							response = renamer.move(r)
+
+							#print(response['response'])
+
+							if bool(response['response']):
+								utilities.printColor("yellow", "Success!")
+							else:
+								print("Error: "+utilities.getColor("red",response['error']))
+
+							
 			
 			
 	
