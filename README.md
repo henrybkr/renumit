@@ -25,6 +25,7 @@ This is a re-write of an existing functional, yet messy application. The idea is
 * Basic menu launched when launched without parameters
 * Run basic api call tests to confirm api is reachable
 * Collect and make use of data found via original filename and container MediaInfo
+* Configurable decision making opportunities for non-video files
 
 ## Features in Progress
 * Configurable renaming based on TMDB api call results
@@ -50,6 +51,7 @@ This is a re-write of an existing functional, yet messy application. The idea is
 * [tmdbsimple](https://github.com/celiao/tmdbsimple) via [TMDb](https://www.themoviedb.org/)
 * [send2trash](https://github.com/hsoft/send2trash) - Cross-platform recycle/trash library
 * [terminaltables](https://github.com/Robpol86/terminaltables) - Table drawing for console applications
+* [progress](https://github.com/verigak/progress) - Easy progress reporting for Python
 
 ## Future Stuff
 * Currently considering a C# implementation with a dedicated GUI for Windows OS'

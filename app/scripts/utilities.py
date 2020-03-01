@@ -6,6 +6,7 @@
 
 import os
 from terminaltables import AsciiTable
+from send2trash import send2trash
 
 line = "--------------------------------------------------------------------------------"
 clear_win = lambda: os.system('cls')											# Empty (windows) cmd window
@@ -62,12 +63,11 @@ def beginMenu():
 	
 	appContinue = True
 	while appContinue == True:
-		menuResult = menu()				# Present menu to user
+		menuResult = menu()																								# Present menu to user
 		if menuResult[0] == 0:
-			appContinue = False			# If the result is 0, end the while loop, ending the application.
+			appContinue = False																							# If the result is 0, end the while loop, ending the application.
 		else:
-			# Here we should launch the additional options in the menu. Might want to launch them from the menu utility itself, idk.
-			print("\nMenu option was successfully chosen. However, functionality not currently there.")		
+			print("\nMenu option was successfully chosen. However, functionality not currently there.")					# Here we should launch the additional options in the menu. Might want to launch them from the menu utility itself, idk.
 
 
 # Function to write a single line to the cli
@@ -114,20 +114,41 @@ def pathValidityDebug(validPaths, invalidPaths):
 def reportErrors(filePaths, invalidPaths, sortingErrors):
 	# Report errors from the related error arrays if errors exist.
 
-	if invalidPaths or sortingErrors:											# Only continue if any errors actually exist.
-		print("\nWhoops, looks like we've got some errors...\n")				# Generic user feedback
-		invalidTableData, renameErrorTableData = [], []							# Table data lists
+	if invalidPaths or sortingErrors:																					# Only continue if any errors actually exist.
+		print("\nWhoops, looks like we've got some errors...\n")														# Generic user feedback
+		invalidTableData, renameErrorTableData = [], []																	# Table data lists
 		# invalidPaths first
 		for i in invalidPaths:
-			invalidTableData.append([i,"Path invalid"])							# Includes a generic invalid path message. Might need revisiting later if multiple invalid filepath possibilities (read errors, etc)
+			invalidTableData.append([i,"Path invalid"])																	# Includes a generic invalid path message. Might need revisiting later if multiple invalid filepath possibilities (read errors, etc)
 		# Now for rename errors
 		for r in sortingErrors:
-			renameErrorTableData.append([r['path'], r['error']])				# Include both the path and the error
+			renameErrorTableData.append([r['path'], r['error']])														# Include both the path and the error
 		# Now let's look at displaying the error results to the user
 		if invalidPaths:
-			print(AsciiTable(invalidTableData, "Invalid Paths").table)			# Print the table of errors
+			print(AsciiTable(invalidTableData, "Invalid Paths").table)													# Print the table of errors
 		if sortingErrors:
-			print(AsciiTable(renameErrorTableData, "Sorting Errors").table)		# Print the table of errors
+			print(AsciiTable(renameErrorTableData, "Sorting Errors").table)												# Print the table of errors
+
+
+def renameTable(renameArray, debugMode):
+	if debugMode:
+	
+		tableData = [(getColor("orange","Original Path"), getColor("orange","New Path"))]
+		#tableData.append(("","New Path"))
+
+		for x in renameArray:
+			if x[2]:
+				y = getColor("orange","→ ")+x[0]																		# Produce a little bump, highlighting it's a "main" file
+				z = getColor("orange","→ ")+x[1]																		# Produce a little bump, highlighting it's a "main" file
+				tableData.append((y, z))
+			else:
+				tableData.append((x[0], x[1]))
+
+		if tableData:
+			print(AsciiTable(tableData, "Rename Preview (Debug enabled)").table)
+		else:
+			printColor("yellow", "Warning -- Looks like we have no rename data to display.")
+
 
 # Output the full list of confirmed names/years in table format
 def nameYearTable(array):
@@ -139,19 +160,26 @@ def nameYearTable(array):
 			
 			temp = tableData
 			temp.insert(0,['\nTitle\n','\nYear\n'])
-			print("\n"+AsciiTable(temp, "Confirmed Renames").table+"\n")		# Print the table
+			print("\n"+AsciiTable(temp, "Confirmed Renames").table+"\n")												# Print the table
 	except:
 		print("Warning -- Error with nameYearTable function.")
 
 
 def deleteOrIgnore(config, debug, x):
 	conf = config['nonVideoFiles'].lower()
+
+	if debug:
+		print(("Debug -- deleteOrIgnore decision for file: '"+x+"' --> ")+(getColor("yellow", conf)))
+
 	if conf == "delete":
 		print("--> Run code to delete -->" + "'" + x + "'")
 	elif conf == "recycle":
-		print("--> Run code to recycle -->" + "'" + x + "'")
-	elif conf == "recycle":
-		print("--> Run code to recycle -->" + "'" + x + "'")
+		send2trash(x.replace('\\\\','\\'))                                                      					# Recycle functionality
+		if checkExist(x):
+			return { 'issue': True, 'message': getColor("yellow","Warning -- Attempted to recycle '"+x+"' but it still exists.")}
+		elif(debug):
+			printColor("yellow", "Recycled the file: '"+x+"'.", debug)
+			return
 	else:
 		print("--> User config says we don't need to delete --> " + "'" + x + "'")
 
@@ -161,7 +189,7 @@ def addSpaces(inputString, spaceChar):
 	else:
 		return ""
 
-def printColor(color, string, *args, **kwargs):					# Function to output string as a colour
+def printColor(color, string, *args, **kwargs):																			# Function to output string as a colour
 	always = kwargs.get('always', False)
 	debugMode = kwargs.get('debugMode', False)
 	if (always is True) or (debugMode is True):
@@ -176,6 +204,8 @@ def printColor(color, string, *args, **kwargs):					# Function to output string 
 			my_color = "\033[1;36;40m"
 		elif color is "purple":
 			my_color = "\033[1;35;40m"
+		elif color is "orange":
+			my_color = "\033[38;5;214m"
 			
 		if my_color != "":
 			print(my_color+string+"\033[0m")
@@ -192,6 +222,8 @@ def getColor(color, string):
 		my_color = "\033[1;36;40m"
 	elif color is "purple":
 		my_color = "\033[1;35;40m"
+	elif color is "orange":
+		my_color = "\033[38;5;214m"
 		
 	if my_color != "":
 		return(my_color+string+"\033[0m")

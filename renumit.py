@@ -159,12 +159,12 @@ try:
 
 								# Check to see if still more than one video file remains in the list
 								if len(pathMainContentList) != 1:
-									print("updated list = ")
-									print(pathMainContentList)
+									#print("updated list = ")
+									#print(pathMainContentList)
 									sortingErrors.append({'path': path, 'error': "More than one file in main directory"})	# Report back and error about multiple video files in main movie directory.
 								else:
 									if debugMode:
-										print("Located a single 'main' file")
+										print(("Debug -- Confirmed updated 'main' file: ")+utilities.getColor("yellow", pathMainContentList[0]))
 									mainMovieFileLocated = True
 							elif len(pathMainContentList) == 0:
 								sortingErrors.append({'path': path, 'error': "No main file found. Potential empty folder"})	# Report back issue with finding the "main" media file.
@@ -218,8 +218,14 @@ try:
 
 									for y in extraFiles:
 										if not (".mkv" in y or ".mp4" in y):										
-											utilities.deleteOrIgnore(configData, debugMode, y)								# Run the function to decide what to do with the non-video filetype, depending on user settings.
-											extraFiles.remove(y)															# Remove non video files from the array if any exist.
+											response = utilities.deleteOrIgnore(configData, debugMode, y)					# Run the function to decide what to do with the non-video filetype, depending on user settings.
+											if response is None:
+												pass
+											elif response['issue'] == True:
+												print(response['message'])
+												
+											extraFiles.remove(y)															# Regardless whether or not we receive an error, we don't want to process the non-video file. Remove non video files from the array if any exist.
+											
 
 									# Now get new filenames for any bonus files that we plan to keep
 
@@ -237,32 +243,18 @@ try:
 
 						i+=1																								# Finish this loop by incrementing the reference number variable 
 
-					utilities.writeLine()
-					print(" -- Review: --")
-					utilities.writeLine()
-					for z in renameArray:
-						if z[2]:
-							print(("\n"+utilities.getColor("yellow", z[0])+" ---> "+utilities.getColor("purple", z[1])))
-						else:
-							print(" → "+utilities.getColor("green", z[0])+" ---> "+utilities.getColor("yellow", z[1]))
-
+					print("")																								# Output new line before the rename table
+					utilities.renameTable(renameArray, debugMode)															# Output the expected renames if in debug mode (table format)
 
 					# Launch the error report functionality. Only displays errors if there are any.
 					utilities.reportErrors(filePaths, invalidPaths, sortingErrors)
 
-					utilities.writeLine()
+					
 					if utilities.confirm("Ready to rename?"):
 						utilities.writeLine()
 
-						for r in renameArray:
-							response = renamer.move(r)
-
-							#print(response['response'])
-
-							if bool(response['response']):
-								utilities.printColor("yellow", "Success!")
-							else:
-								print("Error: "+utilities.getColor("red",response['error']))
+						response = renamer.moveElements(renameArray)
+						utilities.printColor("green", "move function complete")
 
 							
 			

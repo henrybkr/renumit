@@ -10,6 +10,8 @@ sys.path.insert(1, r'\app\scripts')
 sys.path.insert(1, r'\app\api')
 import utilities, filenameReview # pylint: disable=import-error
 import shutil
+import time
+from progress.bar import Bar
 
 # Run a handful of checks to confirm path is valid, otherwise report back the error.
 def pathValid(inputPath):
@@ -42,6 +44,7 @@ def getNameYear(inputPath, debugMode):
 	else:
 		title = filenameReview.getName(inputPath, debugMode)
 	
+	"""
 	# Debug output only
 	if debugMode:
 		print("\nDebug Output: ")
@@ -51,6 +54,7 @@ def getNameYear(inputPath, debugMode):
 			print('Movie Title & Year -- '+title+' ('+year+')')
 		except:
 			print('Movie Title -- '+title+' -- no valid year found')
+	"""
 
 	return (True, error, title, year)
 
@@ -70,8 +74,9 @@ def getNames(configJSON, nameYearList, filenameData, mediaInfoData):
 	codec		= utilities.addSpaces(mediaInfoData['codec'],space)
 	edition		= utilities.addSpaces(filenameData['edition'],space)
 	source		= utilities.addSpaces(filenameData['source'],space)
+	ext			= filenameData['extension']
 
-	newOutputFilename = (title+year_brackets+resolution+codec+edition+source).strip()
+	newOutputFilename = (title+year_brackets+resolution+codec+edition+source).strip()+ext
 	
 	if space == ".":
 		newDirName = title+space+nameYearList['year']
@@ -140,6 +145,32 @@ def removePrefKeywords(configJSON, inputFilename):
 
 	return inputFilename
 
+# Class for a custom progress bar based on the default one.
+class CustomBar(Bar):
+	fill = '*'
+	suffix = '%(percent).1f%% - %(eta)ds'
+	empty_fill = '∙'
+	fill = utilities.getColor('orange','█')
+
+# Function that runs the move function but also keeps note of overall progress.
+def moveElements(renames):
+	bar = CustomBar("Processing files", max=len(renames))			# A progress bar, the max set to the length of the list
+	issues = []
+	
+	with bar:
+		for r in renames:
+
+			response = move(r)									# Run the rename function with the current list elements, keep note of the response.
+
+			if not bool(response['response']):
+				issues.append([r,response['error']])
+			bar.next()
+	utilities.printColor("yellow", "\nProcessing of files complete.\n", debugMode=True)
+
+	if issues:
+		for x in issues:
+			print(x)
+
 def move(arrayElement):
 	response = False
 	error = ""
@@ -160,3 +191,4 @@ def move(arrayElement):
 		error = "File already exists."
 	
 	return {'response': response, 'error': error}
+

@@ -8,6 +8,7 @@
 # Required imports
 import sys
 import re
+import os
 sys.path.insert(1, r'\app\scripts')
 sys.path.insert(1, r'\app\api')
 sys.path.insert(1, r'\app\sorting')
@@ -53,11 +54,13 @@ def getYear(path, debug):
 				if debug:
 					print("-- Debug: Failed to match a 4 digit number in the string with whitespace or dots.")
 
+	"""
 	# Debug testing
 	if debug:
 		print("Path = "+path)
 		print("'"+str(year)+"'")
 		utilities.writeLine()
+	"""
 
 	currentYear = int(date.today().strftime("%Y"))										# Current year, used as a reference for how high a year should be (+3 years over just in case)
 	if (year == 0):
@@ -84,6 +87,8 @@ def stripBadCharacters(x):
 
 def reviewPath(inputPath):
 
+	filename, ext = os.path.splitext(inputPath)											# split the filename and extension from the input path
+
 	path = (inputPath.split("\\")[-2])+"\\"+((inputPath.split("\\"))[-1])				# Note, this might pose issues later. It finds the parent directory and the main movie file (+ extension) used for reference
 	altPath = path.replace(".", " ")
 
@@ -91,6 +96,7 @@ def reviewPath(inputPath):
 	edition = getEdition(path)
 	source = getSource(path)
 	mediaInfoData = mediaInfoReview.basicInfo(inputPath)
+	
 	##print(mediaInfoData)
 	
 
@@ -101,7 +107,7 @@ def reviewPath(inputPath):
 		source = getSource(altPath)
 	
 
-	return {'edition': edition, 'source': source}
+	return {'edition': edition, 'source': source, 'extension': ext}
 
 # Function to collect edition information from a provided path if available
 def getEdition(path):
