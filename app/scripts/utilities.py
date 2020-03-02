@@ -227,3 +227,4 @@ def getColor(color, string):
 		
 	if my_color != "":
 		return(my_color+string+"\033[0m")
+

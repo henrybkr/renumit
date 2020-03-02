@@ -6,6 +6,7 @@
 
 # Required imports
 import sys
+import os
 sys.path.insert(1, r'\app\scripts')
 sys.path.insert(1, r'\app\api')
 import utilities, filenameReview # pylint: disable=import-error
@@ -119,7 +120,7 @@ def getNewExtraPath(configJSON, debugMode, currentFullPath, confirmedNewFilename
 				else:
 					skip = True
 			else:
-				newFolderPath = "\\Featurettes\\"	# Assume file is a featurette
+				newFolderPath = "\\Featurettes\\"	# Assume file is a bonus file
 
 	
 	return newFolderPath+confirmedNewFilename
@@ -171,17 +172,28 @@ def moveElements(renames):
 		for x in issues:
 			print(x)
 
+def makeDirForFile(inputFilename):
+	os.makedirs(os.path.dirname(inputFilename))				# Create content directory
+
 def move(arrayElement):
 	response = False
 	error = ""
 
-	#print(arrayElement[0]+" ---> "+arrayElement[1])
+	#print(utilities.getColor("red", "'"+arrayElement[0]+"'"))
+	#print(utilities.getColor("green", "'"+arrayElement[1]+"'"))
 
+	
 	if not utilities.checkExist(arrayElement[1]):
 		utilities.printColor("yellow", "Attempting to move...")
-		#shutil.move(arrayElement[0], arrayElement[1])											# Move the content to destination directory with new filename
+
+		# Create the directory required for this file if not already present.
+		if not utilities.checkExist(os.path.dirname(arrayElement[1])):		# If folder doesn't already exist
+			makeDirForFile(arrayElement[1])
+
+		shutil.move(arrayElement[0], arrayElement[1])											# Move the content to destination directory with new filename
 		if utilities.checkExist(arrayElement[1]):												# Confirm the newly moved file now exists
-			if utilities.checkExist(arrayElement[0]):											# Confirm the old file location is now gone
+			time.sleep(0.5)
+			if not utilities.checkExist(arrayElement[0]):										# Confirm the old file location is now gone
 				response = True																	# Set response to true when all conditions are met
 			else:
 				error = "Move attempted - The newly moved file exists but it still exists in the old location."

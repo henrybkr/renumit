@@ -189,28 +189,22 @@ try:
 							if mainMovieFile:
 								# Now begin to collect information about this full file path and create new names
 								
-								filenameData = filenameReview.reviewPath(mainMovieFile)										# Run script to determine information about the path. Requires relative path for splitting.
+								filenameData = filenameReview.reviewPath(mainMovieFile)															# Run script to determine information about the path. Requires relative path for splitting.
 								mediaInfoData = mediaInfoReview.basicInfo(mainMovieFile)
 
-								newNames = renamer.getNames(configData,nameYearsArray[i],filenameData, mediaInfoData)		# Get folder and file names for the sort
-								
-								renameArray.append([mainMovieFile, (sortedDir+r"/"+newNames['directory']+r"/"+newNames['filename']), True])
-								
-								#print(newNames['directory']+r"/"+newNames['filename'])
+								newNames = renamer.getNames(configData,nameYearsArray[i],filenameData, mediaInfoData)							# Get folder and file names for the sort
+								renameArray.append([mainMovieFile, (sortedDir+"\\"+newNames['directory']+"\\"+newNames['filename']), True])		# Append the original main file location and the new location. Set third array column as true to highlight is main file.
 
 								# Now turn to additional files inside the directory. Collect all files listings and remove the "main" file
 
-								extraFiles = []																				# Empty list to hold all full file listings from the input path
+								extraFiles = []																									# Empty list to hold all full file listings from the input path
 								for (current_path, dirs, files) in os.walk(validPaths[i]):
 									for file in files:
 										ext = os.path.splitext(file)[1]
-										#filename = os.path.splitext(file)[0].replace("."," ")
 										full_path = (current_path+"\\"+file)
 										extraFiles.append(full_path)
 								
-
 								extraFiles.remove(mainMovieFile)															# Remove the "main" file from the full list of all files
-								#print(extraFiles)
 
 								if len(extraFiles) > 0:
 
@@ -232,15 +226,7 @@ try:
 									for y in extraFiles:
 										onlyFile = os.path.basename(y)
 										confirmedFilename = renamer.checkFilename(configData, onlyFile)
-										#blah = os.path.splitext(y)[0]
-										#print(blah)
-										renameArray.append([y, (sortedDir+"\\"+newNames['directory']+"\\"+newNames['filename']+renamer.getNewExtraPath(configData, debugMode, y, confirmedFilename)), False])
-
-								
-								#tempFiles.remove(mainMovieFile)
-
-								#print(tempFiles)
-
+										renameArray.append([y, (sortedDir+"\\"+newNames['directory']+"\\"+renamer.getNewExtraPath(configData, debugMode, y, confirmedFilename)), False])
 						i+=1																								# Finish this loop by incrementing the reference number variable 
 
 					print("")																								# Output new line before the rename table
@@ -254,7 +240,8 @@ try:
 						utilities.writeLine()
 
 						response = renamer.moveElements(renameArray)
-						utilities.printColor("green", "move function complete")
+						print(response)
+						utilities.printColor("green", "move function complete", debugMode=True)
 
 							
 			

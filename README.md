@@ -17,27 +17,26 @@ This is a re-write of an existing functional, yet messy application. The idea is
 
 ## Current Features
 * Interaction with the [TMDb](https://www.themoviedb.org/) API
-* Produce new file structures for both a main movie file and any corresponding extras (still testing - not currently renaming files yet!)
+* Produce new file structures for both a main movie file and any corresponding extras
+* Move existing files/folder structures to the new preferred structure
 * Configurable user preferences
 * Able to accept either direct file path or directories as an input
-* Duplication helper utility
-* Able to delete or skip over non-video files
+* Duplication helper utility (Will be utilised properly soon)
+* Configurable decisions to delete, recycle or skip over non-video files
 * Basic menu launched when launched without parameters
 * Run basic api call tests to confirm api is reachable
-* Collect and make use of data found via original filename and container MediaInfo
-* Configurable decision making opportunities for non-video files
+* Collect and make use of data found via original filename and video container MediaInfo
+* Opportunity for a debug preview of renames before attempting to move anything and display some additional process information
 
 ## Features in Progress
-* Configurable renaming based on TMDB api call results
-* Handle multiple file path inputs during the sorting process
 * Debug option in the config file to confirm actions and output additional information to the user
-* Produce a preview of renames before attempting to move anything
 * Offer configurable naming formats for the output filenames
 * Remove unwanted keywords from files that are not directly renamed
 * Configurable option to delete/recycle unwanted filetypes or specific filenames
+* Folder clean up functionality for after the sorting process 
 
 ## Features to Implement
-* Greater communication and involvement of the duplication utility script - currently operation mostly separately
+* Greater communication and involvement of the duplication utility script - currently operating mostly separately
 * Produce a full list of required python libraries for this application
 * History logs for each time the tool completes a rename with potential undo feature
 * API interaction for TheTVDB and OMDb as alternatives to TMDb
