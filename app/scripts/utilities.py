@@ -7,6 +7,8 @@
 import os
 from terminaltables import AsciiTable
 from send2trash import send2trash
+from os.path import join
+import time
 
 line = "--------------------------------------------------------------------------------"
 clear_win = lambda: os.system('cls')											# Empty (windows) cmd window
@@ -228,3 +230,66 @@ def getColor(color, string):
 	if my_color != "":
 		return(my_color+string+"\033[0m")
 
+def recycleFolder(inputPath):
+	try:
+		#print("Nothing here! Can be deleted!")                                                     # Confirmed no remaining files or subfolders. Delete.
+		send2trash(inputPath.replace('\\\\','\\'))                                                      # Recycle functionality
+		if os.path.exists(inputPath):
+			print("Failed to delete.")
+			return False                                                                       # Add the issue to the cleanup error array
+		else:
+			return True
+	except PermissionError:
+		print("Error_501: Don't have permission to recycle folder!")
+		return False
+##########
+
+def deleteEmptyDirs(inputDir):												# Function used to clearup empty folders (usually after they have been moved)
+	my_filepath = inputDir
+		
+	if os.path.exists(my_filepath):
+		for root, dirs, files in os.walk(my_filepath,topdown=False):
+			for name in dirs:
+				fname = join(root,name)
+				#print("--> "+fname)
+				for dirpath, dirnames, files in os.walk(fname):
+					#print("dir length = ", dirpath,len(dirnames))
+					if files:
+						#print("File exists here, can't delete yet.")                                               # When a file still remains, break
+						##c.append([fname]) 
+						break
+					elif len(dirnames) != 0:
+						#print("Directory exists here with subfolder/file inside, can't delete yet.")               # When a subfolder still remains, break
+						##c.append([fname])
+						break
+					else:
+						try:
+							#print("Nothing here! Can be deleted!")                                                     # Confirmed no remaining files or subfolders. Delete.
+							send2trash(fname.replace('\\\\','\\'))                                                      # Recycle functionality
+							if os.path.exists(fname):
+								print("Failed to delete.")
+								##c.append([fname])                                                                       # Add the issue to the cleanup error array
+						except PermissionError:
+							#printColor("red", "Error_501: Don't have permission to recycle folder!", debugMode=True)
+							##c.append([fname])
+							pass
+						#else:                       
+							#print("RECYCLED!")	
+
+		# Now check if the root folder can be deleted
+		if os.path.exists(my_filepath):
+			for dirpath, dirnames, files in os.walk(my_filepath):
+				if files:
+					break
+				elif len(dirnames) != 0:
+					break
+				else:
+					try:
+						#print("Nothing here! Can be deleted!")
+						send2trash(my_filepath.replace('\\\\','\\'))													# Recycle functionality
+					except PermissionError:
+						##if debug:
+						printColor("red", "Error_502: Don't have permission to recycle folder!", debugMode=True)
+						##c.append([my_filepath])
+	else:
+		print("fail, path doesn't exist: 20")

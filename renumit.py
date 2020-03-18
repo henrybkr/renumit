@@ -36,6 +36,28 @@ testMode = True
 
 #########################
 # Application run order:
+
+"""
+try:
+	utilities.clear_win()
+	filePaths = utilities.intro(sys.argv[1:])
+
+	for x in filePaths:
+		utilities.deleteEmptyDirs(x)
+				
+	print("\n---\nend of app")
+	sys.exit()
+
+except Exception as e:
+	#os.system("pause")
+	print("\n\n"+utilities.line+"\nSorry, looks like the app has failed somewhere...\nPlease provide the following information to me on my github page:\n"+utilities.line+"\nhttps://github.com/henrybkr/renumit\n"+utilities.line)
+	
+	# Raise the issue only if the internal debug mode active.
+	if testMode:
+		raise
+	os.system("pause")
+"""
+
 try:
 	utilities.clear_win()																										# Clear the window on first launch.
 	filePaths = utilities.intro(sys.argv[1:])																					# Run intro and review potential file paths provided to app.
@@ -240,7 +262,9 @@ try:
 						utilities.writeLine()
 
 						response = renamer.moveElements(renameArray)
-						print(response)
+						
+						## Note to self, probably need some kind of check for the response. If true, add error to an array. Once all moves have been completed, output green success for all okay, yellow for some errors, red for all errors.
+
 						utilities.printColor("green", "move function complete", debugMode=True)
 
 							

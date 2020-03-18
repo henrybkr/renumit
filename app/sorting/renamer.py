@@ -192,7 +192,6 @@ def move(arrayElement):
 
 		shutil.move(arrayElement[0], arrayElement[1])											# Move the content to destination directory with new filename
 		if utilities.checkExist(arrayElement[1]):												# Confirm the newly moved file now exists
-			time.sleep(0.5)
 			if not utilities.checkExist(arrayElement[0]):										# Confirm the old file location is now gone
 				response = True																	# Set response to true when all conditions are met
 			else:
