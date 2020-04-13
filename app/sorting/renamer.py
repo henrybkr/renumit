@@ -7,9 +7,11 @@
 # Required imports
 import sys
 import os
-sys.path.insert(1, r'\app\scripts')
-sys.path.insert(1, r'\app\api')
-import utilities, filenameReview # pylint: disable=import-error
+#sys.path.insert(1, r'\app\scripts')
+#sys.path.insert(1, r'\app\api')
+#from Renumit.app.scripts import utilities, filenameReview # pylint: disable=import-error
+from ..scripts import utilities
+from ..sorting import filenameReview
 import shutil
 import time
 from progress.bar import Bar
@@ -154,41 +156,53 @@ class CustomBar(Bar):
 	fill = utilities.getColor('orange','█')
 
 # Function that runs the move function but also keeps note of overall progress.
-def moveElements(renames):
+def moveElements(renames, configFile):
 	bar = CustomBar("Processing files", max=len(renames))			# A progress bar, the max set to the length of the list
 	issues = []
 	
 	with bar:
 		for r in renames:
 
-			response = move(r)									# Run the rename function with the current list elements, keep note of the response.
+			response = move(r, configFile)									# Run the rename function with the current list elements, keep note of the response.
 
 			if not bool(response['response']):
 				issues.append([r,response['error']])
 			bar.next()
-	utilities.printColor("yellow", "\nProcessing of files complete.\n", debugMode=True)
 
 	if issues:
+		utilities.printColor("yellow", "\n-- Warning: Processing of files complete With these errors:\n", always=True)
 		for x in issues:
-			print(x)
+			utilities.printColor("red", x, always=True)
+	else:
+		utilities.printColor("green", "\n-- Info: Processing of files completed with no errors.\n", always=True)
 
 def makeDirForFile(inputFilename):
 	os.makedirs(os.path.dirname(inputFilename))				# Create content directory
 
-def move(arrayElement):
+def move(arrayElement, configFile):
 	response = False
 	error = ""
 
-	#print(utilities.getColor("red", "'"+arrayElement[0]+"'"))
-	#print(utilities.getColor("green", "'"+arrayElement[1]+"'"))
-
+	try:
+		shouldDeleteCovers = configFile['removeCoverTitles']
+	except:
+		print("Failed to get config file['removeCoverTitles']")
+		shouldDeleteCovers = 0
 	
 	if not utilities.checkExist(arrayElement[1]):
-		utilities.printColor("yellow", "Attempting to move...")
+		#utilities.printColor("yellow", "Attempting to move...")
 
 		# Create the directory required for this file if not already present.
 		if not utilities.checkExist(os.path.dirname(arrayElement[1])):		# If folder doesn't already exist
 			makeDirForFile(arrayElement[1])
+
+		if shouldDeleteCovers:
+			#print("should delete covers dude")
+			if not (arrayElement[2]):
+				#print(arrayElement[0]+" --> this is an extra!")
+
+				## NOTE TO SELF: Here we should remove extra covers if the config file says they only want covers removed from extra files. Should also implement something to do it for all files, not just extras
+				pass
 
 		shutil.move(arrayElement[0], arrayElement[1])											# Move the content to destination directory with new filename
 		if utilities.checkExist(arrayElement[1]):												# Confirm the newly moved file now exists
@@ -198,6 +212,8 @@ def move(arrayElement):
 				error = "Move attempted - The newly moved file exists but it still exists in the old location."
 		else:
 			error = "Move attempted - The newly moved file doesn't exist."
+		
+		response = True
 	else:
 		error = "File already exists."
 	

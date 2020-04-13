@@ -7,9 +7,13 @@
 
 # Required imports
 import sys
-sys.path.insert(1, r'\app\scripts')
-sys.path.insert(1, r'\app\api')
-import utilities, tmdbHelper # pylint: disable=import-error
+#sys.path.insert(1, r'\app\scripts')
+#sys.path.insert(1, r'\app\api')
+
+from . import utilities
+from ..api import tmdbHelper
+
+#import utilities, tmdbHelper # pylint: disable=import-error
 import json
 
 # Primary area for confirming api keys are valid
@@ -48,7 +52,7 @@ def apiTest(api, key, debug=None):
 					tmdbTitle = data['results'][0]['title']
 					
 					if tmdbTitle == "The Matrix":
-						print("-- Info: Good response from TMDb.")
+						utilities.printColor('green', "-- Info: Good response from TMDb.", debugMode=debug)
 						return True																											# Provide confirmation working as expected
 					else:
 						if debug:
@@ -75,14 +79,14 @@ def apiTest(api, key, debug=None):
 		#print(result)
 		
 		elif api is "tvdb":
-			print("-- Info: TVDB check not yet functional.")
+			utilities.printColor('yellow', "-- Warning: TVDB check not yet functional.", debugMode=debug)
 			return False
 		# OMDb
 		elif api is "omdb":
-			print("-- Info: OMDB check not yet functional.")
+			utilities.printColor('yellow', "-- Warning: OMDb check not yet functional.", debugMode=debug)
 			return False
 		else:
-			print("-- Error: Problem selecting mode in apiKeyChecker")
+			utilities.printColor('red', "-- Error: Problem selecting mode in apiKeyChecker.", always=True)
 			return False
 	except:
-		print("-- Error: Error with api apiTest.")
+		utilities.printColor('red', "-- Error: Error with api apiTest.", always=True)

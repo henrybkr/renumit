@@ -7,8 +7,9 @@
 
 # Required imports
 import sys
-sys.path.insert(1, r'\app\scripts')
-import utilities
+#sys.path.insert(1, r'\app\scripts')
+#import utilities
+from . import utilities
 import json, os
 
 # Read from the config file if it exists, else generate it.

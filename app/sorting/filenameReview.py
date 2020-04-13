@@ -9,10 +9,17 @@
 import sys
 import re
 import os
-sys.path.insert(1, r'\app\scripts')
-sys.path.insert(1, r'\app\api')
-sys.path.insert(1, r'\app\sorting')
-import utilities, mediaInfoReview # pylint: disable=import-error
+#sys.path.insert(1, r'\app\scripts')
+#sys.path.insert(1, r'\app\api')
+#sys.path.insert(1, r'\app\sorting')
+#import utilities, mediaInfoReview # pylint: disable=import-error
+
+
+from ..scripts.utilities import *
+
+
+
+from . import mediaInfoReview
 from datetime import date
 
 # Attempt to collect a name and year from a path
@@ -155,12 +162,11 @@ def getSource(path):
 	
 	if ("bluray" in ref) or ("bdrip" in ref) or ("blu ray" in ref) or (" bd " in ref) or ("blu-ray" in ref):
 		source = "Blu-Ray"
-	if ("hddvd" in ref) or ("hd-dvd" in ref):
+	elif ("hddvd" in ref) or ("hd-dvd" in ref):
 		source = "HDDVD"
 	elif ("dvd" in ref) or ("dvdrip" in ref) or ("dvd-rip" in ref):
 		source = "DVD"
 	elif ("web-dl" in ref) or ("web dl" in ref) or ("web x265" in ref) or ("web x264" in ref) or ("webrip" in ref) or ("web-rip" in ref) or ("web h.264" in ref) or ("web h.265" in ref):
 		source = "WEB"
-	else:
-		return source
 	
+	return source

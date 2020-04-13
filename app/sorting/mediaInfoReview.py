@@ -7,9 +7,10 @@
 
 # Required imports
 import sys, subprocess, os
-sys.path.insert(1, r'\app\scripts')
-sys.path.insert(1, r'\app\api')
-import utilities # pylint: disable=import-error
+#sys.path.insert(1, r'\app\scripts')
+#sys.path.insert(1, r'\app\api')
+#import utilities # pylint: disable=import-error
+from ..scripts import utilities
 
 
 def get(path):											# Function to produce a mediainfo text output as a string (utf-8 format)

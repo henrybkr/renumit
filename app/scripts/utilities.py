@@ -9,25 +9,59 @@ from terminaltables import AsciiTable
 from send2trash import send2trash
 from os.path import join
 import time
+from pathlib import Path
 
-line = "--------------------------------------------------------------------------------"
+line = "--------------------------------------------------------------------------------------------------"
 clear_win = lambda: os.system('cls')											# Empty (windows) cmd window
 
+# Function to output an introduction to the tool.
+def intro(path):
 
-# Function to output an optional introduction to the tool. Returns the list of filepaths provided if any.
-def intro(filePaths=None):
-	print(line+"\n-- Welcome to Renumit, a tool used for renaming media files --------------------\n"+line+"\n")			# Output introduction to user.
-	
+	menu_file = path+r"\\data\\menu_ascii.txt"																			# Expected relative path to the renumit config file.
+
+	with open(menu_file) as f: # The with keyword automatically closes the file when you are done
+		printColor("yellow", "\n ~~ Presenting ~~ ", always=True)
+		printColor("orange", f.read(), always=True)
+
+	printColor("yellow", "\n"+line+"\n                              -- A media renaming script by hbkr --                               \n"+line+"\n", always=True)			# Output introduction to user.
+
+# Returns the list of filepaths provided if any.
+def getValidPaths(debugMode, filePaths=None):
+	print("")																																# New line for presentation purposes
+	writeLine()
+	validPaths = []
+	hasInvalidPaths = False
+
 	# Check if the user has provided filepaths to the application.
 	if filePaths:
-		return filePaths																									# Return the list of filepaths
+		for path in filePaths:
+
+			if checkExist(path):
+				if (getDirFileSize(path) == 0):
+					hasInvalidPaths = True
+					printColor("yellow", "-- Warning: The following path is empty or has only empty files:", debugMode=debugMode)
+					printColor("standard", '-→ '+path, debugMode=debugMode)
+					if (confirm("Do you wish to delete this folder now?")):
+						deleteEmptyDirs(path)
+					else:
+						printColor("standard", "-- Info: Okay, skipped this one!", debugMode=debugMode)
+				else:
+					validPaths.append(path)																									# This path has something inside that the application can analyse, so it's a valid path, append it to the array.
+			else:
+				hasInvalidPaths = True
+				printColor("yellow", "-- Warning: The following path doesn't exist:", debugMode=debugMode)
+				printColor("standard", '-→ '+path, debugMode=debugMode)
+		
+		if hasInvalidPaths:
+			writeLine()
+		return validPaths																													# Once the for loop has finished, returned the list of 'valid' paths.
+
 	else:
 		return False
 
 # The menu itself, displaying information to the user.		
 def menu():
 	user_choice = False
-	
 	
 	# Begin menu loop.
 	while user_choice == False:
@@ -140,11 +174,13 @@ def renameTable(renameArray, debugMode):
 
 		for x in renameArray:
 			if x[2]:
-				y = getColor("orange","→ ")+x[0]																		# Produce a little bump, highlighting it's a "main" file
-				z = getColor("orange","→ ")+x[1]																		# Produce a little bump, highlighting it's a "main" file
+				y = getColor("orange","―→ ")+x[0]																		# Produce a little bump, highlighting it's a "main" file
+				z = getColor("orange","―→ ")+x[1]																		# Produce a little bump, highlighting it's a "main" file
 				tableData.append((y, z))
 			else:
-				tableData.append((x[0], x[1]))
+				y = getColor("orange","|――→ ")+x[0]																		# Similar to above, indicate it's a extra with a larger arrow.
+				z = getColor("orange","|――→ ")+x[1]																		
+				tableData.append((y, z))
 
 		if tableData:
 			print(AsciiTable(tableData, "Rename Preview (Debug enabled)").table)
@@ -210,7 +246,9 @@ def printColor(color, string, *args, **kwargs):																			# Function to 
 			my_color = "\033[38;5;214m"
 			
 		if my_color != "":
-			print(my_color+string+"\033[0m")
+			print(my_color+str(string)+"\033[0m")
+		else:
+			print(str(string))
 
 def getColor(color, string):
 	my_color = ""
@@ -244,41 +282,43 @@ def recycleFolder(inputPath):
 		return False
 ##########
 
-def deleteEmptyDirs(inputDir):												# Function used to clearup empty folders (usually after they have been moved)
+def deleteEmptyDirs(inputDir):												# Function used to clear up empty folders (usually after they have been moved)
 	my_filepath = inputDir
 		
 	if os.path.exists(my_filepath):
 		for root, dirs, files in os.walk(my_filepath,topdown=False):
 			for name in dirs:
-				fname = join(root,name)
-				#print("--> "+fname)
-				for dirpath, dirnames, files in os.walk(fname):
+				fileName = join(root,name)
+
+				# _ is a dummy variable, but normally it would be the directory path for os.walk
+				for _, dirnames, files in os.walk(fileName):
 					#print("dir length = ", dirpath,len(dirnames))
 					if files:
 						#print("File exists here, can't delete yet.")                                               # When a file still remains, break
-						##c.append([fname]) 
+						##c.append([fileName]) 
 						break
 					elif len(dirnames) != 0:
 						#print("Directory exists here with subfolder/file inside, can't delete yet.")               # When a subfolder still remains, break
-						##c.append([fname])
+						##c.append([fileName])
 						break
 					else:
 						try:
 							#print("Nothing here! Can be deleted!")                                                     # Confirmed no remaining files or subfolders. Delete.
-							send2trash(fname.replace('\\\\','\\'))                                                      # Recycle functionality
-							if os.path.exists(fname):
+							send2trash(fileName.replace('\\\\','\\'))                                                      # Recycle functionality
+							if os.path.exists(fileName):
 								print("Failed to delete.")
-								##c.append([fname])                                                                       # Add the issue to the cleanup error array
+								##c.append([fileName])                                                                       # Add the issue to the cleanup error array
 						except PermissionError:
 							#printColor("red", "Error_501: Don't have permission to recycle folder!", debugMode=True)
-							##c.append([fname])
+							##c.append([fileName])
 							pass
 						#else:                       
 							#print("RECYCLED!")	
 
 		# Now check if the root folder can be deleted
 		if os.path.exists(my_filepath):
-			for dirpath, dirnames, files in os.walk(my_filepath):
+			# _ is a dummy variable, but normally it would be the directory path for os.walk
+			for _, dirnames, files in os.walk(my_filepath):
 				if files:
 					break
 				elif len(dirnames) != 0:
@@ -292,4 +332,19 @@ def deleteEmptyDirs(inputDir):												# Function used to clearup empty folde
 						printColor("red", "Error_502: Don't have permission to recycle folder!", debugMode=True)
 						##c.append([my_filepath])
 	else:
-		print("fail, path doesn't exist: 20")
+		if not (".mkv" in my_filepath or ".mp4" in my_filepath):
+			printColor("yellow", "-- Warning: Fail to delete empty directory. Likely already deleted! (error 20)", debugMode=True)
+
+# Collect the size (in bytes) of a given path directory.
+def getDirFileSize(path):
+	# For file input
+	if os.path.isfile(path):
+		return os.path.getsize(path)
+	# For directory input
+	elif os.path.isdir(path):
+		return sum(f.stat().st_size for f in Path(path).glob('**/*') if f.is_file())
+	# Error handling
+	else:
+		# Error handling
+		printColor("red", "-- Error: Can't determine if this is a file or folder to run validity checks (getDirFileSize).", debugMode=True)
+		return 0
