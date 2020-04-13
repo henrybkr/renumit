@@ -1,10 +1,10 @@
-<p align="center"><img src="https://github.com/henrybkr/renumit/blob/master/data/logo_1.png" width="350"></p>
+<p align="center"><img src="data/logo_1.png" width="400"></p>
 
-# 'Renumit Changelog'
+# 'Renumit' Changelog
 > Overview of changes made to the app.
 
 ## 2020-04-13
-* At this point, it's fairly usable for movies, although you should check renames before confirming. Must currently enable the debug flag in the config file.
+* At this point, it's in a fairly usable beta state for movies. You should check any renames before confirming. Must currently be ran using debug mode. Enable the debug flag via the config file.
 * Folder clean-up: Will now detect and delete any empty directories after a rename.
 * Improvements when dealing with both a file input (example 'file.mkv') and folder paths.
 * Switched to more standard approach with how modules/classes are imported arround the application.

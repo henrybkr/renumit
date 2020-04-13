@@ -1,11 +1,11 @@
-<p align="center"><img src="https://github.com/henrybkr/renumit/blob/master/data/logo_1.png" width="350"></p>
+<p align="center"><img src="data/logo_1.png" width="400"></p>
 
 # 'Renumit'
 > Deriving from the Romanian word for renamed, renowned or famous. In the Romanian language 're' refers to 'again' whereas 'numit' refers to being 'named'.
 
 ## Important Notes
-* This application is currently in development and not yet ready for use!
-* Currently only supported on Windows - Testing on Windows 10
+* This application is currently in development but ready for testing using the debug flag in the .config file.
+* Currently only supported on Windows - Tested via Windows 10.
 
 ## About
 A personal project making use of python to build a CLI based application for the sorting personal media into desired naming schemes and folder structures. The job of this application is to take given file paths parameters, read from user preferences and make assumptions in order to sort them as instructed. The primary focus will firstly be the sorting movie files into a chosen directory but may later look into other areas such as TV and Anime content.
@@ -13,7 +13,8 @@ A personal project making use of python to build a CLI based application for the
 This is a re-write of an existing functional, yet messy application. The idea is to make the existing app more modular and readable in order to improve chances of later extending it's functionality.
 
 ## Usage
-> renumit.py "path/to/your/media"
+> renumit.py "path/to/your/media_folder"
+> renumit.py "path/to/your/video.mkv"
 
 ## Current Features
 * Interaction with the [TMDb](https://www.themoviedb.org/) API
@@ -27,6 +28,10 @@ This is a re-write of an existing functional, yet messy application. The idea is
 * Run basic api call tests to confirm api is reachable
 * Collect and make use of data found via original filename and video container MediaInfo
 * Opportunity for a debug preview of renames before attempting to move anything and display some additional process information
+* Cleans up after itself after renaming
+
+## Changelog
+<a href="changelog.md">Click here for changelog</a>
 
 ## Features in Progress
 * Debug option in the config file to confirm actions and output additional information to the user
