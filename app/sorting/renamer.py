@@ -11,7 +11,7 @@ import os
 #sys.path.insert(1, r'\app\api')
 #from Renumit.app.scripts import utilities, filenameReview # pylint: disable=import-error
 from ..scripts import utilities
-from ..sorting import filenameReview
+from ..sorting import filenameReview, modifyFile
 import shutil
 import time
 from progress.bar import Bar
@@ -46,18 +46,6 @@ def getNameYear(inputPath, debugMode):
 		title = filenameReview.getName(inputPath, debugMode, year)
 	else:
 		title = filenameReview.getName(inputPath, debugMode)
-	
-	"""
-	# Debug output only
-	if debugMode:
-		print("\nDebug Output: ")
-		utilities.writeLine()
-		print('Input Path -- '+inputPath)
-		try:
-			print('Movie Title & Year -- '+title+' ('+year+')')
-		except:
-			print('Movie Title -- '+title+' -- no valid year found')
-	"""
 
 	return (True, error, title, year)
 
@@ -92,7 +80,7 @@ def getNewExtraPath(configJSON, debugMode, currentFullPath, confirmedNewFilename
 	folder = configJSON['bonusFolderName']
 
 	path = currentFullPath.lower()
-
+	#print(path)
 
 	if ("\\deleted scenes\\" in path):
 		newFolderPath = "\\"+folder+"\\Deleted Scenes\\"
@@ -103,28 +91,50 @@ def getNewExtraPath(configJSON, debugMode, currentFullPath, confirmedNewFilename
 	elif ("\\behind the scenes\\" in path):
 		newFolderPath = "\\"+folder+"\\Behind The Scenes\\"
 	elif ("\\featurettes\\" in path) or ("\\extra\\" in path) or ("\\extras\\" in path) or ("\\bonus\\" in path):
-		newFolderPath = "\\"+folder+"\\"
-	else:
-		if "mkv" in path:				# Skip if not a mkv file
-			if "main menu" in path:
-				newFolderPath = "\\"+folder+"\\"
-			elif "menu" in path:
-				newFolderPath = "\\"+folder+"\\"
-			elif "trailer" in path:
-				newFolderPath = "\\"+folder+"\\"
-			elif "promo.mkv" in path:
-				newFolderPath = "\\"+folder+"\\"
-			elif "extra.mkv" in path or "extras.mkv" in path:
-				newFolderPath = "\\"+folder+"\\"
-			elif debugMode:
-				if utilities.confirm("Having trouble with a file. Is '"+path+"' an extra?"):
-					newFolderPath = "\\Featurettes\\"
-				else:
-					skip = True
-			else:
-				newFolderPath = "\\Featurettes\\"	# Assume file is a bonus file
 
-	
+		#if "mkv" in path:				# Skip if not a mkv file
+		
+		if "main menu" in path:
+			newFolderPath = "\\"+folder+"\\"
+		elif "menu" in path:
+			newFolderPath = "\\"+folder+"\\"
+		elif "trailer" in path:
+			newFolderPath = "\\"+folder+"\\Trailers\\"
+		elif "promo.mkv" in path:
+			newFolderPath = "\\"+folder+"\\"
+		elif "deleted" in path and "scene" in path:
+			newFolderPath = "\\"+folder+"\\Deleted Scenes\\"
+		elif "interview" in path:
+			newFolderPath = "\\"+folder+"\\Interviews\\"
+		elif "short" in path:
+			newFolderPath = "\\"+folder+"\\Shorts\\"
+		elif "extra.mkv" in path or "extras.mkv" in path:
+			newFolderPath = "\\"+folder+"\\"
+		else:
+			newFolderPath = "\\"+folder+"\\"
+
+	else:
+		#if "mkv" in path:				# Skip if not a mkv file
+
+		if "main menu" in path:
+			newFolderPath = "\\"+folder+"\\"
+		elif "menu" in path:
+			newFolderPath = "\\"+folder+"\\"
+		elif "trailer" in path:
+			newFolderPath = "\\"+folder+"\\"
+		elif "promo.mkv" in path:
+			newFolderPath = "\\"+folder+"\\"
+		elif "extra.mkv" in path or "extras.mkv" in path:
+			newFolderPath = "\\"+folder+"\\"
+		elif debugMode:
+			if utilities.confirm("Having trouble with a file. Is '"+path+"' an extra?"):
+				newFolderPath = "\\Featurettes\\"
+			else:
+				skip = True
+		else:
+			newFolderPath = "\\Featurettes\\"	# Assume file is a bonus file
+
+	#utilities.printColor("yellow", newFolderPath, always=True)
 	return newFolderPath+confirmedNewFilename
 
 # Function to check and potentially modify input filenames
@@ -164,6 +174,7 @@ def moveElements(renames, configFile):
 		for r in renames:
 
 			response = move(r, configFile)									# Run the rename function with the current list elements, keep note of the response.
+			#print(response)
 
 			if not bool(response['response']):
 				issues.append([r,response['error']])
@@ -171,8 +182,10 @@ def moveElements(renames, configFile):
 
 	if issues:
 		utilities.printColor("yellow", "\n-- Warning: Processing of files complete With these errors:\n", always=True)
-		for x in issues:
-			utilities.printColor("red", x, always=True)
+		
+		utilities.failedMoveTable(issues)
+		#for x in issues:
+		#	utilities.printColor("red", x, always=True)
 	else:
 		utilities.printColor("green", "\n-- Info: Processing of files completed with no errors.\n", always=True)
 
@@ -182,40 +195,72 @@ def makeDirForFile(inputFilename):
 def move(arrayElement, configFile):
 	response = False
 	error = ""
+	mkvModifierConfig = [False, False]
 
+	# Check that the config answers are valid, else return errors and fail next step.
 	try:
-		shouldDeleteCovers = configFile['removeCoverTitles']
+		shouldDeleteCovers = int(configFile['removeCovers'])
 	except:
-		print("Failed to get config file['removeCoverTitles']")
+		print("Failed to get config file['removeCovers']")
 		shouldDeleteCovers = 0
+	try:
+		shouldRemoveMKVTitle = int(configFile['removeMKVTitle'])
+	except:
+		print("Failed to get config file['removeCovers']")
+		shouldRemoveMKVTitle = 0
+
+	if shouldRemoveMKVTitle and shouldDeleteCovers:
 	
-	if not utilities.checkExist(arrayElement[1]):
-		#utilities.printColor("yellow", "Attempting to move...")
+		if not utilities.checkExist(arrayElement[1]):
+			# Create the directory required for this file if not already present.
+			if not utilities.checkExist(os.path.dirname(arrayElement[1])):		# If folder doesn't already exist
+				makeDirForFile(arrayElement[1])
 
-		# Create the directory required for this file if not already present.
-		if not utilities.checkExist(os.path.dirname(arrayElement[1])):		# If folder doesn't already exist
-			makeDirForFile(arrayElement[1])
+			if ".mkv" in arrayElement[0]:																													# Additional check to make sure file is a .mkv file.
+				if not (arrayElement[2]):																													# File is a 'extra' file.
+					# Check if we should remove covers...
+					if shouldDeleteCovers == 2 or shouldDeleteCovers == 1:
+						#utilities.printColor("red", "EXTRA --- should delete cover for: "+arrayElement[1], always=True)
+						mkvModifierConfig[0] = True																												# Set the remove cover flag for this file - used later.
+					# Then check if we should remove title from video track on the mkv
+					if shouldRemoveMKVTitle == 2 or shouldRemoveMKVTitle == 1:
+						#utilities.printColor("purple", "EXTRA --- should delete title for: "+arrayElement[1], always=True)
+						mkvModifierConfig[1] = True																												# Set the remove title flag for this file - used later.
+					
+				else:																																		# File is a 'main' movie file.
+					# Check if we should remove covers...
+					if shouldDeleteCovers == 1:
+						#utilities.printColor("cyan", "MAIN --- should delete cover for: "+arrayElement[1], always=True)
+						mkvModifierConfig[0] = True					# Set the remove cover flag for this file - used later.
+					# Then check if we should remove title from video track on the mkv
+					if shouldRemoveMKVTitle == 1:
+						#utilities.printColor("purple", "MAIN --- should delete title for: "+arrayElement[1], always=True)
+						mkvModifierConfig[1] = True																												# Set the remove title flag for this file - used later.
 
-		if shouldDeleteCovers:
-			#print("should delete covers dude")
-			if not (arrayElement[2]):
-				#print(arrayElement[0]+" --> this is an extra!")
 
-				## NOTE TO SELF: Here we should remove extra covers if the config file says they only want covers removed from extra files. Should also implement something to do it for all files, not just extras
-				pass
+				#utilities.printColor("green", "launch the mkv patch function?", always=True)
+				if mkvModifierConfig[0] or mkvModifierConfig[1]:
+					modifyFile.updateTracks(arrayElement[0], mkvModifierConfig)							# Launch MKV track edit function, passing config settings.
 
-		shutil.move(arrayElement[0], arrayElement[1])											# Move the content to destination directory with new filename
-		if utilities.checkExist(arrayElement[1]):												# Confirm the newly moved file now exists
-			if not utilities.checkExist(arrayElement[0]):										# Confirm the old file location is now gone
-				response = True																	# Set response to true when all conditions are met
+
+				response = False																		# Default response. Suggests failure unless confirmed otherwise.
+				shutil.move(arrayElement[0], arrayElement[1])											# Move the content to destination directory with new filename
+				if utilities.checkExist(arrayElement[1]):												# Confirm the newly moved file now exists
+					if not utilities.checkExist(arrayElement[0]):										# Confirm the old file location is now gone
+						response = True																	# Set response to true when all conditions are met
+					else:
+						error = "Move attempted - The newly moved file exists but it still exists in the old location."
+				else:
+					error = "Move attempted - Moved file doesn't exist. Potential permission error."
 			else:
-				error = "Move attempted - The newly moved file exists but it still exists in the old location."
+				error = "This file is not a mkv file and was skipped."
 		else:
-			error = "Move attempted - The newly moved file doesn't exist."
-		
-		response = True
+			error = "File already exists."
 	else:
-		error = "File already exists."
+		error = "Failed a check regarding MKV title and cover. Please check your config file."
+
+	return {'response': response, 'error': error}													# Return a response and any error we might have come across
 	
-	return {'response': response, 'error': error}
+	
+
 

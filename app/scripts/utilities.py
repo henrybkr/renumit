@@ -168,24 +168,29 @@ def reportErrors(filePaths, invalidPaths, sortingErrors):
 
 def renameTable(renameArray, debugMode):
 	if debugMode:
-	
-		tableData = [(getColor("orange","Original Path"), getColor("orange","New Path"))]
-		#tableData.append(("","New Path"))
 
-		for x in renameArray:
-			if x[2]:
-				y = getColor("orange","―→ ")+x[0]																		# Produce a little bump, highlighting it's a "main" file
-				z = getColor("orange","―→ ")+x[1]																		# Produce a little bump, highlighting it's a "main" file
-				tableData.append((y, z))
+		if len(renameArray) > 0:
+
+			tableData = [(getColor("orange","Original Path"), getColor("orange","New Path"))]
+
+			for x in renameArray:
+				if x[2]:
+					y = getColor("orange","―→ ")+x[0]																		# Produce a little bump, highlighting it's a "main" file
+					z = getColor("orange","―→ ")+x[1]																		# Produce a little bump, highlighting it's a "main" file
+					tableData.append((y, z))
+				else:
+					y = getColor("orange","|――→ ")+x[0]																		# Similar to above, indicate it's a extra with a larger arrow.
+					z = getColor("orange","|――→ ")+x[1]																		
+					tableData.append((y, z))
+
+			if tableData:
+				print("\n" + AsciiTable(tableData, "Rename Preview (Debug enabled)").table)
 			else:
-				y = getColor("orange","|――→ ")+x[0]																		# Similar to above, indicate it's a extra with a larger arrow.
-				z = getColor("orange","|――→ ")+x[1]																		
-				tableData.append((y, z))
+				printColor("yellow", "Warning -- Looks like we have no rename data to display.")
+			return True
 
-		if tableData:
-			print(AsciiTable(tableData, "Rename Preview (Debug enabled)").table)
 		else:
-			printColor("yellow", "Warning -- Looks like we have no rename data to display.")
+			return False
 
 
 # Output the full list of confirmed names/years in table format
@@ -197,13 +202,16 @@ def nameYearTable(array):
 				tableData.append([y['title'], y['year']])
 			
 			temp = tableData
-			temp.insert(0,['\nTitle\n','\nYear\n'])
-			print("\n"+AsciiTable(temp, "Confirmed Renames").table+"\n")												# Print the table
+			temp.insert(0,[getColor('orange','Title'),getColor('orange','Year')])
+			print("\n"+AsciiTable(temp, "Movie Names/Years").table+"\n")												# Print the table
 	except:
 		print("Warning -- Error with nameYearTable function.")
 
 
 def deleteOrIgnore(config, debug, x):
+
+	debug = False
+
 	conf = config['nonVideoFiles'].lower()
 
 	if debug:
@@ -219,7 +227,8 @@ def deleteOrIgnore(config, debug, x):
 			printColor("yellow", "Recycled the file: '"+x+"'.", debug)
 			return
 	else:
-		print("--> User config says we don't need to delete --> " + "'" + x + "'")
+		if debug:
+			print("--> User config says we don't need to delete --> " + "'" + x + "'")
 
 def addSpaces(inputString, spaceChar):
 	if str(inputString) != "":
@@ -348,3 +357,38 @@ def getDirFileSize(path):
 		# Error handling
 		printColor("red", "-- Error: Can't determine if this is a file or folder to run validity checks (getDirFileSize).", debugMode=True)
 		return 0
+
+def configTable(configData):
+	if configData:
+		tableData = []
+		tableData.append([getColor("orange", "Your Sorting/File Modification Preferences"), getColor("orange", "Value")])
+		tableData.append([getColor("orange", "→")+" Remove covers from MKV's?", mainExtrasStringSwitch(configData['removeCovers'])])
+		
+		tableData.append([getColor("orange", "→")+" Remove video titles from MKV's?", mainExtrasStringSwitch(configData['removeMKVTitle'])])
+		tableData.append([getColor("orange", "→")+" Keep non-MKV Files?", configData['keepNonMkv']])
+		tableData.append([getColor("orange", "→")+" What to do with non-video files?", configData['nonVideoFiles']])
+
+		print("\n"+AsciiTable(tableData).table)													# Print the table of errors
+	else:
+		printColor("red", "-- Error: Missing configData for configTable feature.", always=True)
+
+# Basic 'switch' implementation for outputting a string based on input string number input. Used a few times.
+def mainExtrasStringSwitch(stringValue):
+	#print(stringValue)
+	num = int(stringValue)								# Convert the string number value to an integer.
+	switcher = {
+		0: "False / No Action",
+		1: "Apply to all files",
+		2: "Apply to extras only",
+	}
+	return switcher.get(num, "Invalid month")
+
+def failedMoveTable(issueArray):
+
+	failTable = []
+
+	failTable.append([getColor('orange', 'Original Filename'), getColor('orange', 'Expected New Filename'), getColor('orange', 'Error')])
+	for issue in issueArray:
+		failTable.append([issue[0][0], issue[0][1], issue[1]])
+
+	print("\n"+AsciiTable(failTable, getColor("red", "Moving Errors")).table)

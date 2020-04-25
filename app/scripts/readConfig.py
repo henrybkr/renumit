@@ -25,10 +25,10 @@ def read(path):
 	debug = False
 	keepNonMkv = False
 	sortedDir = ""
-	removeCoverTitles = False
+	removeCovers = False
+	removeMKVTitle = False
 	keyword_strip = False
 	keywordsToStrip = []
-	deleteNonVideos = False
 	
 	
 	# First step, check that an existing config file exists
@@ -68,10 +68,25 @@ def read(path):
 				keepNonMkv = True
 			if ((config_data[12].split('sorted_location = "')[1].split('"')[0]) != ""):
 				sortedDir = config_data[12].split('sorted_location = "')[1].split('"')[0]
-			if (config_data[13].lower().find("true") != -1):												# Config to remove mkv covers
-				removeCoverTitles = True
+			
+			# Config to remove mkv covers (with support for all, none, or only extras)
+			if (config_data[13].lower().find("true extras") != -1):											# Config to remove mkv covers (extras only, check first)
+				removeCovers = 2
+			elif (config_data[13].lower().find("true") != -1):												# Config to remove mkv covers (all files)
+				removeCovers = 1
+			else:
+				removeCovers = False																		# Otherwise skip removing covers
+
 			temp_nonvid = config_data[15].split('non_video_files = "')[1].split('"')[0]						# Determine if non-video type files should be sorted, deleted, recycled or skipped.
 			temp_bonus_folder = config_data[16].split('bonus_folder_name = "')[1].split('"')[0]
+
+			# Config to remove mkv video titles (with support for all, none, or only extras)
+			if (config_data[17].lower().find("true extras") != -1):											# extras only, check first
+				removeMKVTitle = 2
+			elif (config_data[17].lower().find("true") != -1):												# all files
+				removeMKVTitle = 1
+			else:
+				removeMKVTitle = False																		# Otherwise skip removing title from video
 
 			# Read from personalisation section
 			if (config_data[20].lower().find("true") != -1):
@@ -125,7 +140,8 @@ def read(path):
 			a['matchRate'] = matchRatio
 			a['debugMode'] = debug
 			a['keepNonMkv'] = keepNonMkv
-			a['removeCoverTitles'] = removeCoverTitles
+			a['removeCovers'] = removeCovers
+			a['removeMKVTitle'] = removeMKVTitle
 			a['sortedDirectory'] = sortedDir
 			a['keywordsToStrip'] = keywordsToStrip
 			a['nonVideoFiles'] = nonVideoFiles

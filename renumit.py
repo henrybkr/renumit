@@ -23,18 +23,11 @@ import glob
 #########################
 # Include other path locations at runtime for easier access to package files, etc in different directories
 
-#sys.path.insert(1, r'app\api')
-#sys.path.insert(1, r'app\history')
-#sys.path.insert(1, r'app\scripts')
-#sys.path.insert(1, r'app\sorting')
-
 from app.scripts import utilities
 from app.scripts import configCheck
 from app.scripts import readConfig
 from app.sorting import filenameReview, mediaInfoReview, renamer
 from app.api import tmdbHelper 
-
-#import utilities, readConfig, configCheck, filenameReview, renamer, tmdbHelper, mediaInfoReview # pylint: disable=import-error
 
 #########################
 # Global variables, testing only:
@@ -42,27 +35,6 @@ testMode = True
 
 #########################
 # Application run order:
-
-"""
-try:
-	utilities.clear_win()
-	filePaths = utilities.intro(sys.argv[1:])
-
-	for x in filePaths:
-		utilities.deleteEmptyDirs(x)
-				
-	print("\n---\nend of app")
-	sys.exit()
-
-except Exception as e:
-	#os.system("pause")
-	print("\n\n"+utilities.line+"\nSorry, looks like the app has failed somewhere...\nPlease provide the following information to me on my github page:\n"+utilities.line+"\nhttps://github.com/henrybkr/renumit\n"+utilities.line)
-	
-	# Raise the issue only if the internal debug mode active.
-	if testMode:
-		raise
-	os.system("pause")
-"""
 
 try:
 	mainDir = os.path.dirname(os.path.abspath(__file__))
@@ -194,8 +166,8 @@ try:
 										#print(pathMainContentList)
 										sortingErrors.append({'path': path, 'error': "More than one file in main directory"})	# Report back and error about multiple video files in main movie directory.
 									else:
-										if debugMode:
-											print(("Debug -- Confirmed updated 'main' file: ")+utilities.getColor("yellow", pathMainContentList[0]))
+										#if debugMode:
+											#print(("Debug -- Confirmed updated 'main' file: ")+utilities.getColor("yellow", pathMainContentList[0]))
 										mainMovieFileLocated = True
 								elif len(pathMainContentList) == 0:
 									sortingErrors.append({'path': path, 'error': "No main file found. Potential empty folder"})	# Report back issue with finding the "main" media file.
@@ -209,9 +181,7 @@ try:
 						
 							
 							# Will only continue if the main movie file is located.
-							if not mainMovieFileLocated:
-								print("Warning -- Looks like we can't find a main file for this path. Needs debugging.")
-							else:
+							if mainMovieFileLocated:
 								try:
 									mainMovieFile = pathMainContentList[0]
 								except:
@@ -227,7 +197,7 @@ try:
 									filenameData = filenameReview.reviewPath(mainMovieFile)															# Run script to determine information about the path. Requires relative path for splitting.
 									mediaInfoData = mediaInfoReview.basicInfo(mainMovieFile)
 
-									newNames = renamer.getNames(configData,nameYearsArray[i],filenameData, mediaInfoData)							# Get folder and file names for the sort
+									newNames = renamer.getNames(configData, nameYearsArray[i], filenameData, mediaInfoData)							# Get folder and file names for the sort
 									renameArray.append([mainMovieFile, (sortedDir+"\\"+newNames['directory']+"\\"+newNames['filename']), True])		# Append the original main file location and the new location. Set third array column as true to highlight is main file.
 
 									# Now turn to additional files inside the directory. Collect all files listings and remove the "main" file
@@ -266,25 +236,34 @@ try:
 							bar.next()
 							i+=1																								# Finish this loop by incrementing the reference number variable 
 
-					print("")																								# Output new line before the rename table
-					utilities.renameTable(renameArray, debugMode)															# Output the expected renames if in debug mode (table format)
+					utilities.renameTable(renameArray, debugMode)																# Output the expected renames if in debug mode (table format)
 
 					# Launch the error report functionality. Only displays errors if there are any.
 					utilities.reportErrors(filePaths, invalidPaths, sortingErrors)
 
-					if utilities.confirm("Ready to rename?"):
-						utilities.writeLine()
+					# Only continue at this point if there is confirmed renames to process.
+					if(len(renameArray) <= 0):
+						utilities.printColor("yellow", "\n-- Warning: Cannot continue as there are no valid renames to process.", always=True)
+					else:
+						# Output some user config settings if in debug mode:
+						if debugMode:
+							utilities.configTable(configData)
 
-						#response = renamer.moveElements(renameArray)
 						
-						renamer.moveElements(renameArray, configData)
 
-						for pathToClean in filePaths:
-							utilities.deleteEmptyDirs(pathToClean)
-						
-						## Note to self, probably need some kind of check for the response. If true, add error to an array. Once all moves have been completed, output green success for all okay, yellow for some errors, red for all errors.
+						if utilities.confirm("Ready to rename?"):
+							utilities.writeLine()
 
-						#utilities.printColor("green", "move function complete", debugMode=True)
+							#response = renamer.moveElements(renameArray)
+							
+							renamer.moveElements(renameArray, configData)
+
+							for pathToClean in filePaths:
+								utilities.deleteEmptyDirs(pathToClean)
+							
+							## Note to self, probably need some kind of check for the response. If true, add error to an array. Once all moves have been completed, output green success for all okay, yellow for some errors, red for all errors.
+
+							#utilities.printColor("green", "move function complete", debugMode=True)
 
 			else:
 				utilities.printColor("yellow", "\n-- Warning: Looks like there are no valid paths to rename.", always=True)

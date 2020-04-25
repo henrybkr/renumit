@@ -24,7 +24,7 @@ total_dupes = 0																					# Variable to retain total number of dupes l
 #E:\Renumit_sorted
 
 ## Note to self, for now, always put the first location as the one you want to move to a dupe folder.
-locations_to_check = ['O:\Movies THREE', 'E:\Renumit_Sorted']
+locations_to_check = ['H:\Movies TWO', 'F:\_sorted']
 
 # Function to grab a list of all subfolder names of a given path and return it as an array/list.
 def get_list(input_path, append=None):

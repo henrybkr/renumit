@@ -72,12 +72,6 @@ def apiTest(api, key, debug=None):
 					print("-- Debug: TMDb test returned no data.")
 				return False
 		
-			#return testResult
-
-		#result2 = tmdbHelper.search(key, "The Simpsons Movie", 2007)					# Request data from TMDb on given query.
-
-		#print(result)
-		
 		elif api is "tvdb":
 			utilities.printColor('yellow', "-- Warning: TVDB check not yet functional.", debugMode=debug)
 			return False
