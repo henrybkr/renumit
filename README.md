@@ -52,6 +52,7 @@ This is a re-write of an existing functional, yet messy application. The idea is
 ## Technologies Utilised
 * [Python 3.7.3](https://www.python.org/)
 * [MediaInfo](https://mediaarea.net/)
+* [MKVToolNix (mkvpropedit)](https://github.com/nmaier/mkvtoolnix)
 * [tmdbsimple](https://github.com/celiao/tmdbsimple) via [TMDb](https://www.themoviedb.org/)
 * [send2trash](https://github.com/hsoft/send2trash) - Cross-platform recycle/trash library
 * [terminaltables](https://github.com/Robpol86/terminaltables) - Table drawing for console applications

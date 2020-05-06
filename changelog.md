@@ -3,6 +3,10 @@
 # 'Renumit' Changelog
 > Overview of changes made to the app.
 
+## 2020-05-07
+* Bug fix for detection of non-video files in the 'main directory' area.
+* Start of TMDB feature integration to check for correct titles and years. Currently only works when there is one search result.
+
 ## 2020-04-25
 * Further Plex support for extra folders, sending certain detected filenames to folders such as 'Trailers' and 'Deleted Scenes'. 
 * Display a few user preferences before confirming renaming when in debug mode.

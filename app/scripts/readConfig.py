@@ -102,7 +102,7 @@ def read(path):
 
 			# Check values are acceptable.
 			if (utilities.checkExist(sortedDir) is False):
-				if utilities.confirm('"Your desired output folder '+sortedDir+'" does not exist, attempt to create it?'):
+				if utilities.confirm('Your desired output folder "'+sortedDir+'" does not exist, attempt to create it?'):
 					os.makedirs(sortedDir, mode=0o777, exist_ok=False)										# Create content directory
 				else:
 					raise Exception("Error -- You've opted not to create a new folder. Exception triggered as we cannot continue without an output location.")

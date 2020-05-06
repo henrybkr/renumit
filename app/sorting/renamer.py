@@ -15,6 +15,7 @@ from ..sorting import filenameReview, modifyFile
 import shutil
 import time
 from progress.bar import Bar
+from app.api import tmdbHelper
 
 # Run a handful of checks to confirm path is valid, otherwise report back the error.
 def pathValid(inputPath):
@@ -49,23 +50,46 @@ def getNameYear(inputPath, debugMode):
 
 	return (True, error, title, year)
 
+def getNameYearTMDB(key, title, year):
+	response = tmdbHelper.search(key, title, year)
+
+	#utilities.printColor("yellow", , always=True)
+
+	#print(response[0])
+
+	if int(response['total_results']) == 1:
+		title = response['results'][0]['title']
+		year = response['results'][0]['year']
+	else:
+		print("need to run checker here...")
+		pass
+
+
+
+	os.system("pause")
+
+	return { 'title': title, 'year': year }
 
 # Function to get output filenames and directory names based on the user config and details we have at hand
 def getNames(configJSON, nameYearList, filenameData, mediaInfoData):
 	
 	space = configJSON['spaceCharacter']
 
-	#newDir = nameYearList['title']+space+"("+str(nameYearList['year'])+")"	
+	#newDir = nameYearList['title']+space+"("+str(nameYearList['year'])+")"
+
+	response = getNameYearTMDB(configJSON['apiKeys'][0]['key'], nameYearList['title'], nameYearList['year'])
+	#utilities.printColor('green', response, always=True)
 	
-	title		= utilities.addSpaces(nameYearList['title'],space)
-	year		= utilities.addSpaces(nameYearList['year'],space)
+	title				= utilities.addSpaces(nameYearList['title'],space)
+	year				= utilities.addSpaces(nameYearList['year'],space)
+
 	year_brackets		= utilities.addSpaces(("("+nameYearList['year']+")"),space)
 
-	resolution	= utilities.addSpaces((str(mediaInfoData['height'])+mediaInfoData['scanType']),space)
-	codec		= utilities.addSpaces(mediaInfoData['codec'],space)
-	edition		= utilities.addSpaces(filenameData['edition'],space)
-	source		= utilities.addSpaces(filenameData['source'],space)
-	ext			= filenameData['extension']
+	resolution			= utilities.addSpaces((str(mediaInfoData['height'])+mediaInfoData['scanType']),space)
+	codec				= utilities.addSpaces(mediaInfoData['codec'],space)
+	edition				= utilities.addSpaces(filenameData['edition'],space)
+	source				= utilities.addSpaces(filenameData['source'],space)
+	ext					= filenameData['extension']
 
 	newOutputFilename = (title+year_brackets+resolution+codec+edition+source).strip()+ext
 	

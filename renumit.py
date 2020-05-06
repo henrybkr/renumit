@@ -27,7 +27,6 @@ from app.scripts import utilities
 from app.scripts import configCheck
 from app.scripts import readConfig
 from app.sorting import filenameReview, mediaInfoReview, renamer
-from app.api import tmdbHelper 
 
 #########################
 # Global variables, testing only:
@@ -128,7 +127,8 @@ try:
 					
 					
 
-					pathMainContentList = []								# Empty list to be used to store potential "main" files (movie).
+					temp_pathMainContentList = []								# Empty list to be used to store potential "main" files (movie).
+					pathMainContentList = []
 
 					i = 0													# Used for getting the name and year from array.
 					
@@ -143,23 +143,30 @@ try:
 								# confirm if path is a mkv/mp4 file
 								if ".mkv" in path or ".mp4" in path:
 									mainMovieFileLocated = True
-									pathMainContentList = [path]
+									temp_pathMainContentList = [path]
 								else:
 									sortingErrors.append({'path': path, 'error': "Bad file. Appears to be a non-media file."})	# Report back and error about multiple video files in main movie directory.
 								
 							# If the path is a directory
 							elif (os.path.isdir(path)):
 								myPath = re.sub(r'([\[\]])','[\\1]',path)														# Note to self, glob doesn't seem to like square brackets, so removing seems to do the trick
-								pathMainContentList = [f for f in glob.glob(myPath + "**/*.*", recursive=True)]					# Collect a full list of all files in the main directory
+								temp_pathMainContentList = [f for f in glob.glob(myPath + "**/*.*", recursive=True)]					# Collect a full list of all files in the main directory
+								
 								# In the event of more than one "main" file being located...
-								if len(pathMainContentList) > 1:
+								if len(temp_pathMainContentList) > 1:
 
-									for x in pathMainContentList:
+									for x in temp_pathMainContentList:
 										
 										if not (".mkv" in x or ".mp4" in x):										
 											utilities.deleteOrIgnore(configData, debugMode, x)									# Run the function to decide what to do with the non-video filetype, depending on user settings.
-											pathMainContentList.remove(x)														# Remove non video files from the array if any exist.
+										else:
+											pathMainContentList.append(x)														# Remove non video files from the array if any exist.
 
+									#for j in pathMainContentList:
+									#	utilities.printColor("yellow", j, always=True)
+
+									pathMainContentList = temp_pathMainContentList
+									
 									# Check to see if still more than one video file remains in the list
 									if len(pathMainContentList) != 1:
 										#print("updated list = ")
@@ -169,12 +176,14 @@ try:
 										#if debugMode:
 											#print(("Debug -- Confirmed updated 'main' file: ")+utilities.getColor("yellow", pathMainContentList[0]))
 										mainMovieFileLocated = True
-								elif len(pathMainContentList) == 0:
+								elif len(temp_pathMainContentList) == 0:
 									sortingErrors.append({'path': path, 'error': "No main file found. Potential empty folder"})	# Report back issue with finding the "main" media file.
 								
 								else:
+									pathMainContentList = temp_pathMainContentList
 									# Only one "main" file found in the directory (good!)
 									mainMovieFileLocated = True
+
 							# Error handling, output error.
 							else:
 								print("Warning -- Issue detecting if path is a file or a directory.")

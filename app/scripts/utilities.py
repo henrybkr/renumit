@@ -222,13 +222,14 @@ def deleteOrIgnore(config, debug, x):
 	elif conf == "recycle":
 		send2trash(x.replace('\\\\','\\'))                                                      					# Recycle functionality
 		if checkExist(x):
-			return { 'issue': True, 'message': getColor("yellow","Warning -- Attempted to recycle '"+x+"' but it still exists.")}
+			return { 'issue': True, 'message': "Warning -- Attempted to recycle '"+x+"' but it still exists." }
 		elif(debug):
 			printColor("yellow", "Recycled the file: '"+x+"'.", debug)
-			return
 	else:
 		if debug:
 			print("--> User config says we don't need to delete --> " + "'" + x + "'")
+
+	return { 'issue': False }
 
 def addSpaces(inputString, spaceChar):
 	if str(inputString) != "":
