@@ -3,6 +3,12 @@
 # 'Renumit' Changelog
 > Overview of changes made to the app.
 
+## 2020-05-10
+* Now in a usable state again, bug fix for multiple results in TMDB search being found.
+* Now compares all TMDB results received and looks for most appropriate in search results to use for rename title and year.
+* Added support for sorting into a soundtrack directory (mp3, wav, flac & m4a)
+* Pulled back on assumption we want to delete non-video files immediately. Replaced with highlighting non-video files in rename preview debug table with red arrow. Note, not currently moving non-video files.
+
 ## 2020-05-07
 * Bug fix for detection of non-video files in the 'main directory' area.
 * Start of TMDB feature integration to check for correct titles and years. Currently only works when there is one search result.

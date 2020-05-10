@@ -27,9 +27,10 @@ def pathValid(inputPath):
 	else:
 		return (True, error)
 
+
+# Parse the name and year from the original FILE itself.
 def getNameYear(inputPath, debugMode):
 	error = False
-	
 	# At this point, we are assuming the path exists.
 	
 	# Year collection
@@ -42,7 +43,6 @@ def getNameYear(inputPath, debugMode):
 		print("-- Error: "+yearResponse[1])
 
 	# Title collection with or without year
-	
 	if year:
 		title = filenameReview.getName(inputPath, debugMode, year)
 	else:
@@ -50,40 +50,31 @@ def getNameYear(inputPath, debugMode):
 
 	return (True, error, title, year)
 
-def getNameYearTMDB(key, title, year):
-	response = tmdbHelper.search(key, title, year)
-
-	#utilities.printColor("yellow", , always=True)
-
-	#print(response[0])
-
-	if int(response['total_results']) == 1:
-		title = response['results'][0]['title']
-		year = response['results'][0]['year']
-	else:
-		print("need to run checker here...")
-		pass
-
-
-
-	os.system("pause")
-
-	return { 'title': title, 'year': year }
-
 # Function to get output filenames and directory names based on the user config and details we have at hand
 def getNames(configJSON, nameYearList, filenameData, mediaInfoData):
 	
-	space = configJSON['spaceCharacter']
+	space = configJSON['spaceCharacter']																					# Collect the character the user prefers to use as a 'space' character.
 
-	#newDir = nameYearList['title']+space+"("+str(nameYearList['year'])+")"
+	response = tmdbHelper.search(configJSON['apiKeys'][0]['key'], nameYearList['title'], nameYearList['year'])				# First run a search via TMDB api
 
-	response = getNameYearTMDB(configJSON['apiKeys'][0]['key'], nameYearList['title'], nameYearList['year'])
-	#utilities.printColor('green', response, always=True)
-	
-	title				= utilities.addSpaces(nameYearList['title'],space)
-	year				= utilities.addSpaces(nameYearList['year'],space)
+	#localTitle				= utilities.addSpaces(nameYearList['title'],space)												# Collect name and year from the local file.	
+	#localYear				= utilities.addSpaces(nameYearList['year'],space)
+	localNameYear		= nameYearList['title']+" ("+nameYearList['year']+")"
 
-	year_brackets		= utilities.addSpaces(("("+nameYearList['year']+")"),space)
+	## Now run the comparison function to looks for an appropriate match the search data
+
+	try:
+		parsedResponse = tmdbHelper.compareTMDBNameYear(response, localNameYear, configJSON)															
+		#utilities.printColor("orange", parsedResponse, always=True)
+		if parsedResponse:
+			title = utilities.addSpaces(parsedResponse['title'],space)
+			year = parsedResponse['year']
+			yearBrackets = utilities.addSpaces("("+year+")", space)
+		else:
+			return False																									## No results found. Skip?
+	except:
+		utilities.printColor("red", "parseTMDB error", always=True)
+		raise
 
 	resolution			= utilities.addSpaces((str(mediaInfoData['height'])+mediaInfoData['scanType']),space)
 	codec				= utilities.addSpaces(mediaInfoData['codec'],space)
@@ -91,7 +82,7 @@ def getNames(configJSON, nameYearList, filenameData, mediaInfoData):
 	source				= utilities.addSpaces(filenameData['source'],space)
 	ext					= filenameData['extension']
 
-	newOutputFilename = (title+year_brackets+resolution+codec+edition+source).strip()+ext
+	newOutputFilename = (title+yearBrackets+resolution+codec+edition+source).strip()+ext
 	
 	if space == ".":
 		newDirName = title+space+nameYearList['year']
@@ -134,6 +125,8 @@ def getNewExtraPath(configJSON, debugMode, currentFullPath, confirmedNewFilename
 			newFolderPath = "\\"+folder+"\\Shorts\\"
 		elif "extra.mkv" in path or "extras.mkv" in path:
 			newFolderPath = "\\"+folder+"\\"
+		elif ".m4a" in path or ".mp3" in path or ".wav" in path or ".flac" in path:
+			newFolderPath = "\\"+folder+"\\Soundtrack\\"
 		else:
 			newFolderPath = "\\"+folder+"\\"
 
@@ -190,18 +183,39 @@ class CustomBar(Bar):
 	fill = utilities.getColor('orange','█')
 
 # Function that runs the move function but also keeps note of overall progress.
-def moveElements(renames, configFile):
+def moveElements(renames, configData):
+	debugMode = True
 	bar = CustomBar("Processing files", max=len(renames))			# A progress bar, the max set to the length of the list
 	issues = []
 	
 	with bar:
 		for r in renames:
 
-			response = move(r, configFile)									# Run the rename function with the current list elements, keep note of the response.
-			#print(response)
+			## Note to self, need work here... Detect non-video files and determine if we should rename them, delete them or just skip over them. ref: deleteOrIgnore function.
+
+
+			"""
+			if not "mkv" in r[0] or not "mp4" in r[0]:
+				# First check if we ignore or delete non-video files.									
+				response = utilities.deleteOrIgnore(configData, debugMode, r[0])					# Run the function to decide what to do with the non-video filetype, depending on user settings.
+				print(response)
+
+
+				if response['issue'] == True:
+					print(response['message'])
+				
+				elif response['shouldRename']:
+					## Should skip renaming
+					response = move(r, configData)									# Run the rename function with the current list elements, keep note of the response.
+
+			else:
+				response = move(r, configData)									# Run the rename function with the current list elements, keep note of the response.
+			"""
+			response = move(r, configData)									# Run the rename function with the current list elements, keep note of the response.
 
 			if not bool(response['response']):
 				issues.append([r,response['error']])
+			
 			bar.next()
 
 	if issues:
@@ -286,5 +300,4 @@ def move(arrayElement, configFile):
 	return {'response': response, 'error': error}													# Return a response and any error we might have come across
 	
 	
-
 

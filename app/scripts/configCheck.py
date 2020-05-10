@@ -44,7 +44,7 @@ def apiTest(api, key, debug=None):
 		# TMDb
 		if api is "tmdb":
 			data = tmdbHelper.test(key)
-			print(utilities.line+"\n")																	# Extra new line for improved presentation.
+			print(utilities.line+"\n")																									# Extra new line for improved presentation.
 			
 			# Now we have some data, check that it's useful and not an error message etc.
 			if data:

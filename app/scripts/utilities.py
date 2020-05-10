@@ -175,12 +175,20 @@ def renameTable(renameArray, debugMode):
 
 			for x in renameArray:
 				if x[2]:
-					y = getColor("orange","―→ ")+x[0]																		# Produce a little bump, highlighting it's a "main" file
-					z = getColor("orange","―→ ")+x[1]																		# Produce a little bump, highlighting it's a "main" file
+					if not "mkv" in x[0] and not "mp4" in x[0]:																			# Included check for acceptable file formats. Indicate that action can be taken for this file
+						y = getColor("red","―→ ")+x[0]																			# Produce a little bump, highlighting it's a "main" file
+						z = getColor("red","―→ ")+x[1]																			# Produce a little bump, highlighting it's a "main" file
+					else:
+						y = getColor("orange","―→ ")+x[0]																		# Produce a little bump, highlighting it's a "main" file
+						z = getColor("orange","―→ ")+x[1]																		# Produce a little bump, highlighting it's a "main" file
 					tableData.append((y, z))
 				else:
-					y = getColor("orange","|――→ ")+x[0]																		# Similar to above, indicate it's a extra with a larger arrow.
-					z = getColor("orange","|――→ ")+x[1]																		
+					if not "mkv" in x[0] and not "mp4" in x[0]:																			# Included check for acceptable file formats. Indicate that action can be taken for this file
+						y = getColor("orange","|")+getColor("red", "――→ ")+x[0]																		# Similar to above, indicate it's a extra with a larger arrow.
+						z = getColor("orange","|")+getColor("red", "――→ ")+x[1]																		
+					else:
+						y = getColor("orange","|――→ ")+x[0]																		# Similar to above, indicate it's a extra with a larger arrow.
+						z = getColor("orange","|――→ ")+x[1]																		
 					tableData.append((y, z))
 
 			if tableData:
@@ -222,14 +230,15 @@ def deleteOrIgnore(config, debug, x):
 	elif conf == "recycle":
 		send2trash(x.replace('\\\\','\\'))                                                      					# Recycle functionality
 		if checkExist(x):
-			return { 'issue': True, 'message': "Warning -- Attempted to recycle '"+x+"' but it still exists." }
-		elif(debug):
-			printColor("yellow", "Recycled the file: '"+x+"'.", debug)
+			if(debug):
+				printColor("yellow", "Recycled the file: '"+x+"'.", debug)
+			return { 'issue': True, 'message': "Warning -- Attempted to recycle '"+x+"' but it still exists.", 'shouldRename': False }
 	else:
 		if debug:
 			print("--> User config says we don't need to delete --> " + "'" + x + "'")
+		return { 'issue': False, 'shouldRename': True }
 
-	return { 'issue': False }
+	
 
 def addSpaces(inputString, spaceChar):
 	if str(inputString) != "":
@@ -393,3 +402,7 @@ def failedMoveTable(issueArray):
 		failTable.append([issue[0][0], issue[0][1], issue[1]])
 
 	print("\n"+AsciiTable(failTable, getColor("red", "Moving Errors")).table)
+
+
+def makeTable(title, data):
+	print("\n"+AsciiTable(data, getColor("red", title)).table)

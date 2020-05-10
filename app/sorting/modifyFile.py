@@ -16,7 +16,7 @@ def updateTracks(filePath, config):
 	response = [False, "Unknown Error with updateTracks function."]																																						# Default response, fails unless confirmed otherwise.
 	propEditDir = dirname(dirname(dirname(abspath(__file__))))+"\\binaries\\mkvpropedit.exe"
 
-	#utilities.printColor("orange", propEditDir, always=True)
+	#utilities.printColor("orange", config, always=True)
 
 	if utilities.checkExist(propEditDir):
 

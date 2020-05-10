@@ -207,40 +207,31 @@ try:
 									mediaInfoData = mediaInfoReview.basicInfo(mainMovieFile)
 
 									newNames = renamer.getNames(configData, nameYearsArray[i], filenameData, mediaInfoData)							# Get folder and file names for the sort
-									renameArray.append([mainMovieFile, (sortedDir+"\\"+newNames['directory']+"\\"+newNames['filename']), True])		# Append the original main file location and the new location. Set third array column as true to highlight is main file.
+									if not newNames:
+										sortingErrors.append({'path': path, 'error': "Couldn't find an appropriate TMDB entry for this release"})
 
-									# Now turn to additional files inside the directory. Collect all files listings and remove the "main" file
+									else:
+										renameArray.append([mainMovieFile, (sortedDir+"\\"+newNames['directory']+"\\"+newNames['filename']), True])		# Append the original main file location and the new location. Set third array column as true to highlight is main file.
 
-									extraFiles = []																									# Empty list to hold all full file listings from the input path
-									for (current_path, dirs, files) in os.walk(validPaths[i]):
-										for file in files:
-											ext = os.path.splitext(file)[1]
-											full_path = (current_path+"\\"+file)
-											extraFiles.append(full_path)								
+										# Now turn to additional files inside the directory. Collect all files listings and remove the "main" file
 
-									if len(extraFiles) > 0:
+										extraFiles = []																									# Empty list to hold all full file listings from the input path
+										for (current_path, dirs, files) in os.walk(validPaths[i]):
+											for file in files:
+												ext = os.path.splitext(file)[1]
+												full_path = (current_path+"\\"+file)
+												extraFiles.append(full_path)								
 
-										extraFiles.remove(mainMovieFile)															# Remove the "main" file from the full list of all files
+										if len(extraFiles) > 0:
 
-										# First check if we ignore or delete non-video files.
+											extraFiles.remove(mainMovieFile)															# Remove the "main" file from the full list of all files
 
-										for y in extraFiles:
-											if not (".mkv" in y or ".mp4" in y):										
-												response = utilities.deleteOrIgnore(configData, debugMode, y)					# Run the function to decide what to do with the non-video filetype, depending on user settings.
-												if response is None:
-													pass
-												elif response['issue'] == True:
-													print(response['message'])
-													
-												extraFiles.remove(y)															# Regardless whether or not we receive an error, we don't want to process the non-video file. Remove non video files from the array if any exist.
-												
+											# Now get new filenames for any bonus files that we plan to keep
 
-										# Now get new filenames for any bonus files that we plan to keep
-
-										for y in extraFiles:
-											onlyFile = os.path.basename(y)
-											confirmedFilename = renamer.checkFilename(configData, onlyFile)
-											renameArray.append([y, (sortedDir+"\\"+newNames['directory']+renamer.getNewExtraPath(configData, debugMode, y, confirmedFilename)), False])
+											for y in extraFiles:
+												onlyFile = os.path.basename(y)
+												confirmedFilename = renamer.checkFilename(configData, onlyFile)
+												renameArray.append([y, (sortedDir+"\\"+newNames['directory']+renamer.getNewExtraPath(configData, debugMode, y, confirmedFilename)), False])
 						
 							bar.next()
 							i+=1																								# Finish this loop by incrementing the reference number variable 

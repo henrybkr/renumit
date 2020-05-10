@@ -28,24 +28,26 @@ This is a re-write of an existing functional, yet messy application. The idea is
 * Run basic api call tests to confirm api is reachable
 * Collect and make use of data found via original filename and video container MediaInfo
 * Opportunity for a debug preview of renames before attempting to move anything and display some additional process information
-* Cleans up after itself after renaming
+* Folder clean up functionality for after the sorting process
+* Remove certain covers and titles from mkv files
+* Highlights 'problem' files (non mkv/mp4 files) before confirming whether to sort them.
+* Support for retaining audio (for now only sorts into a 'Soundtrack' directory.
 
 ## Changelog
 <a href="changelog.md">Click here for changelog</a>
 
 ## Features in Progress
+* Further TMDB integration testing. Need better handling when title and year aren't matched (searching by title only and suggesting match to user?) 
 * Debug option in the config file to confirm actions and output additional information to the user
 * Offer configurable naming formats for the output filenames
 * Remove unwanted keywords from files that are not directly renamed
-* Configurable option to delete/recycle unwanted filetypes or specific filenames
-* Folder clean up functionality for after the sorting process 
+* Configurable option to delete/recycle unwanted filetypes - needs improvement
 
 ## Features to Implement
 * Greater communication and involvement of the duplication utility script - currently operating mostly separately
 * Produce a full list of required python libraries for this application
 * History logs for each time the tool completes a rename with potential undo feature
 * API interaction for TheTVDB and OMDb as alternatives to TMDb
-* Configurable option to remove specific metadata from (for now just) MKV file formats such as track names
 * Read and sort television series
 * Capability of comparing potential user duplicates and automatically decide which one to keep
 
@@ -53,6 +55,7 @@ This is a re-write of an existing functional, yet messy application. The idea is
 * [Python 3.7.3](https://www.python.org/)
 * [MediaInfo](https://mediaarea.net/)
 * [MKVToolNix (mkvpropedit)](https://github.com/nmaier/mkvtoolnix)
+
 * [tmdbsimple](https://github.com/celiao/tmdbsimple) via [TMDb](https://www.themoviedb.org/)
 * [send2trash](https://github.com/hsoft/send2trash) - Cross-platform recycle/trash library
 * [terminaltables](https://github.com/Robpol86/terminaltables) - Table drawing for console applications
