@@ -406,3 +406,24 @@ def failedMoveTable(issueArray):
 
 def makeTable(title, data):
 	print("\n"+AsciiTable(data, getColor("red", title)).table)
+
+# Function to produce a relative output directory based on config file.
+def getRelativeOutputPath(path, sortedDirString):
+	drive = os.path.splitdrive(path)
+	outputPath = sortedDirString.replace("***", drive[0]+"")
+
+	# Double check we don't have extra backslashes for our new directory.
+	if "\\\\" in outputPath:
+		outputPath = outputPath.replace("\\\\", "\\")
+
+	return outputPath
+
+# Function to make a directory without any user input.
+def forceMakeDir(path):
+	if not checkExist(path):
+		os.makedirs(path, mode=0o777, exist_ok=False)										# Create content directory
+
+		if checkExist(path):
+			return True
+		else:
+			return False

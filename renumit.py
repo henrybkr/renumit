@@ -41,11 +41,12 @@ try:
 
 	utilities.intro(mainDir)																													# Run application intro.
 	
-	
-	configJSON = readConfig.read(mainDir)																										# Collect config json.
-	configData = json.loads(configJSON)
+
 	apiKeychain = []
 	debugMode = False																															# Set to false but later overwritten.
+
+	configJSON = readConfig.read(mainDir)																										# Collect config json.
+	configData = json.loads(configJSON)
 
 	if not(configJSON):
 		print("-- Hmm, problem with your configuration settings!")
@@ -86,7 +87,8 @@ try:
 					validPaths, invalidPaths = [], []
 					inputPathsProcessedCount = 0     				# Count used to track how many input directories (parametors) have been processed.
 					processedFileCount = 0							# Same as above but for files.
-					sortedDir = configData['sortedDirectory']
+					if not configData['relativeRename']:
+						sortedDir = configData['sortedDirectory']
 
 					# Error lists
 					cleanupPaths, sortingErrors, nameYearsArray, renameArray = [],[],[],[]		# Lists for holding paths about errors, clean up errors, rename errors and the planned renames.
@@ -108,9 +110,9 @@ try:
 					if debugMode:
 						utilities.pathValidityDebug(validPaths, invalidPaths)
 					
-					# Once the preliminary checks are complete, move onto actual sorting						
+					# Once the preliminary checks are complete, move onto grabbing info				
 					for path in validPaths:
-						
+
 						getNameYear_result = renamer.getNameYear(path, debugMode)
 				
 						if getNameYear_result[0] == False:
@@ -134,7 +136,19 @@ try:
 					
 					bar = renamer.CustomBar("Preparing Renames", max=len(validPaths))			# A progress bar, the max set to the length of the list
 					with bar: 
-						for path in validPaths:						
+						for path in validPaths:
+
+							# First we need to confirm if we need a relative output directory or not.
+
+							if configData['relativeRename']:
+								sortedDir = utilities.getRelativeOutputPath(path, configData['sortedDirectory'])
+
+								if not utilities.checkExist(sortedDir):
+									if not utilities.forceMakeDir(sortedDir):
+										raise Exception("Problem making relative directory. Please report the issue!")
+							
+							# Now move onto reviewing files.
+
 							mainMovieFileLocated = False
 
 							# First check if the provided path itself has a container (.mkv)
@@ -231,7 +245,7 @@ try:
 											for y in extraFiles:
 												onlyFile = os.path.basename(y)
 												confirmedFilename = renamer.checkFilename(configData, onlyFile)
-												renameArray.append([y, (sortedDir+"\\"+newNames['directory']+renamer.getNewExtraPath(configData, debugMode, y, confirmedFilename)), False])
+												renameArray.append([y, (sortedDir+"\\"+newNames['directory']+renamer.getNewExtraPath(configData, debugMode, y, confirmedFilename, path)), False])
 						
 							bar.next()
 							i+=1																								# Finish this loop by incrementing the reference number variable 

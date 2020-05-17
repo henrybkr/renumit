@@ -31,7 +31,7 @@ This is a re-write of an existing functional, yet messy application. The idea is
 * Folder clean up functionality for after the sorting process
 * Remove certain covers and titles from mkv files
 * Highlights 'problem' files (non mkv/mp4 files) before confirming whether to sort them.
-* Support for retaining audio (for now only sorts into a 'Soundtrack' directory.
+* Support for retaining soundtracks. Either moves to 'Soundtracks' directory, or a 'Soundtracks/Dynamic Name (2020)' dependent input folder structure.
 
 ## Changelog
 <a href="changelog.md">Click here for changelog</a>

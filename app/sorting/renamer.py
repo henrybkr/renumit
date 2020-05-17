@@ -91,7 +91,7 @@ def getNames(configJSON, nameYearList, filenameData, mediaInfoData):
 
 	return {'directory': newDirName, 'filename': newOutputFilename}
 
-def getNewExtraPath(configJSON, debugMode, currentFullPath, confirmedNewFilename):
+def getNewExtraPath(configJSON, debugMode, currentFullPath, confirmedNewFilename, originalInputPath):
 	folder = configJSON['bonusFolderName']
 
 	path = currentFullPath.lower()
@@ -126,7 +126,15 @@ def getNewExtraPath(configJSON, debugMode, currentFullPath, confirmedNewFilename
 		elif "extra.mkv" in path or "extras.mkv" in path:
 			newFolderPath = "\\"+folder+"\\"
 		elif ".m4a" in path or ".mp3" in path or ".wav" in path or ".flac" in path:
-			newFolderPath = "\\"+folder+"\\Soundtrack\\"
+			# Check if the path just refers to a 'soundtrack' or if we have a usable directory name for the soundtrack folder.
+			dirName = os.path.basename(os.path.dirname(path))
+			inputFolderDir = os.path.basename(originalInputPath)
+			utilities.printColor("green", dirName+" --> "+inputFolderDir, always=True)
+			if dirName != inputFolderDir:
+				print(os.path.basename(currentFullPath))
+				newFolderPath = "\\"+folder+"\\Soundtracks\\"+removePrefKeywords(configJSON, os.path.basename(os.path.dirname(currentFullPath)))+"\\"
+			else:
+				newFolderPath = "\\"+folder+"\\Soundtracks\\"			
 		else:
 			newFolderPath = "\\"+folder+"\\"
 
@@ -243,27 +251,33 @@ def move(arrayElement, configFile):
 		shouldDeleteCovers = 0
 	try:
 		shouldRemoveMKVTitle = int(configFile['removeMKVTitle'])
+		shouldRenameNonMKV = 0
+		#print(configFile['nonVideoFiles'])
+		if "sort" in configFile['nonVideoFiles'].lower():
+			shouldRenameNonMKV = 1
 	except:
 		print("Failed to get config file['removeCovers']")
 		shouldRemoveMKVTitle = 0
 
 	if shouldRemoveMKVTitle and shouldDeleteCovers:
+
+		#print("\n--> "+str(shouldRenameNonMKV))
+		#os.system("PAUSE")
+		#sys.exit()
 	
 		if not utilities.checkExist(arrayElement[1]):
 			# Create the directory required for this file if not already present.
 			if not utilities.checkExist(os.path.dirname(arrayElement[1])):		# If folder doesn't already exist
 				makeDirForFile(arrayElement[1])
 
-			if ".mkv" in arrayElement[0]:																													# Additional check to make sure file is a .mkv file.
+			if (".mkv" in arrayElement[0] or ".mp4" in arrayElement[0]) or shouldRenameNonMKV:																# Additional check to make sure file is a video file or passes check that non-mkv files can be renamed
 				if not (arrayElement[2]):																													# File is a 'extra' file.
 					# Check if we should remove covers...
 					if shouldDeleteCovers == 2 or shouldDeleteCovers == 1:
-						#utilities.printColor("red", "EXTRA --- should delete cover for: "+arrayElement[1], always=True)
-						mkvModifierConfig[0] = True																												# Set the remove cover flag for this file - used later.
+						mkvModifierConfig[0] = True																											# Set the remove cover flag for this file - used later.
 					# Then check if we should remove title from video track on the mkv
 					if shouldRemoveMKVTitle == 2 or shouldRemoveMKVTitle == 1:
-						#utilities.printColor("purple", "EXTRA --- should delete title for: "+arrayElement[1], always=True)
-						mkvModifierConfig[1] = True																												# Set the remove title flag for this file - used later.
+						mkvModifierConfig[1] = True																											# Set the remove title flag for this file - used later.
 					
 				else:																																		# File is a 'main' movie file.
 					# Check if we should remove covers...
@@ -291,7 +305,7 @@ def move(arrayElement, configFile):
 				else:
 					error = "Move attempted - Moved file doesn't exist. Potential permission error."
 			else:
-				error = "This file is not a mkv file and was skipped."
+				error = "This file is not a mkv file and was skipped. 111"
 		else:
 			error = "File already exists."
 	else:

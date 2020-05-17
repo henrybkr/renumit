@@ -3,6 +3,13 @@
 # 'Renumit' Changelog
 > Overview of changes made to the app.
 
+## 2020-05-18
+* Soundtrack sorting improvements, now sending to either 'Soundtracks' or 'Soundtracks/Example Folder' directories dependent on input path structure.
+* Improved sorting of non-mkv files when told to do so in config. Note that filenames are not changed at all at this point. This also allows all filetypes, including likely unwanted filetypes.
+* Dynamic output directory. The user can define either a constant output location (eg. 'sorted_location = "C:\example"') which potentially moves across drives or a relative location based on the input file (eg. sorted_location = "***\example").
+* Bugfixes for preferences.config output and updated to latest required layout.
+* Basic instructions & licence documentation for GitHub
+
 ## 2020-05-10
 * Now in a usable state again, bug fix for multiple results in TMDB search being found.
 * Now compares all TMDB results received and looks for most appropriate in search results to use for rename title and year.

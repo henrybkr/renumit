@@ -15,7 +15,7 @@ import json, os
 # Read from the config file if it exists, else generate it.
 def read(path):
 
-	configPath = path+r"\\data\\preferences.config"																# Expected relative path to the renumit config file.
+	configPath = path+r"\\data\\preferences.config"															# Expected relative path to the renumit config file.
 	config_file = ""																						# Empty for now.
 	
 	# User configuration variables
@@ -29,7 +29,9 @@ def read(path):
 	removeMKVTitle = False
 	keyword_strip = False
 	keywordsToStrip = []
-	
+	relativeRename = False
+
+	currentResponse = 0
 	
 	# First step, check that an existing config file exists
 	try:
@@ -38,12 +40,12 @@ def read(path):
 	# If we can't find the config file, return with the result of not found.
 	except FileNotFoundError:																				# When file is not found
 		#print("Warning_101: No config file found. Creating one now!")
-		return 1
+		currentResponse = 1
 	
 	# Any other exception that might be found, return error.
 	except:
 		print("Unknown Error!")
-		return 2
+		currentResponse = 2
 	
 	if config_file:
 		try:
@@ -68,6 +70,12 @@ def read(path):
 				keepNonMkv = True
 			if ((config_data[12].split('sorted_location = "')[1].split('"')[0]) != ""):
 				sortedDir = config_data[12].split('sorted_location = "')[1].split('"')[0]
+
+				# Quick check to see if user wants to use relative path of where their original files are from.
+				if "***" in sortedDir:
+					relativeRename = True
+
+
 			
 			# Config to remove mkv covers (with support for all, none, or only extras)
 			if (config_data[13].lower().find("true extras") != -1):											# Config to remove mkv covers (extras only, check first)
@@ -101,15 +109,17 @@ def read(path):
 
 
 			# Check values are acceptable.
-			if (utilities.checkExist(sortedDir) is False):
-				if utilities.confirm('Your desired output folder "'+sortedDir+'" does not exist, attempt to create it?'):
-					os.makedirs(sortedDir, mode=0o777, exist_ok=False)										# Create content directory
-				else:
-					raise Exception("Error -- You've opted not to create a new folder. Exception triggered as we cannot continue without an output location.")
-					## Need some error handling here
-					
+
+			if not relativeRename:
 				if (utilities.checkExist(sortedDir) is False):
-					raise Exception('Tried to create this directory, but failed.') 							# Raise exception when failed to create requested directory.
+					if utilities.confirm('Your desired output folder "'+sortedDir+'" does not exist, attempt to create it?'):
+						os.makedirs(sortedDir, mode=0o777, exist_ok=False)										# Create content directory
+					else:
+						raise Exception("Error -- You've opted not to create a new folder. Exception triggered as we cannot continue without an output location.")
+						## Need some error handling here
+						
+					if (utilities.checkExist(sortedDir) is False):
+						raise Exception('Tried to create this directory, but failed.') 							# Raise exception when failed to create requested directory.
 			
 			# Check non-video string is acceptable
 			if temp_nonvid == "sort" or temp_nonvid == "skip" or temp_nonvid == "delete" or temp_nonvid == "recycle":
@@ -143,6 +153,7 @@ def read(path):
 			a['removeCovers'] = removeCovers
 			a['removeMKVTitle'] = removeMKVTitle
 			a['sortedDirectory'] = sortedDir
+			a['relativeRename'] = relativeRename
 			a['keywordsToStrip'] = keywordsToStrip
 			a['nonVideoFiles'] = nonVideoFiles
 			a['bonusFolderName'] = bonusFolderName
@@ -159,7 +170,13 @@ def read(path):
 		except:
 			print("Whoops, error in readConfig.read()")
 			raise
-			return 3
+			currentResponse = 3
+	
+	else:
+		newConfig(path)
+		utilities.printColor("orange", "Please edit your config file and relaunch the application.", always=True)
+		sys.exit()
+	return currentResponse
 
 ##
 
@@ -167,12 +184,16 @@ def read(path):
 
 ##
 
-def newConfig(path):
+def newConfig(inputPath):
 	try:
-	
-		config_file = open("renumit.config", "w+")
-		config_file.write('### RENUMIT CONFIG FILE ###\n\n# API Keys\nTMDb = ""\nTVDb = ""\nOMDb = ""\n\n\n# Settings\nmatch_rate = 0.875\ndebug = False\nkeep_non_mkv = False\nsorted_location = ""\nremove_covers_titles = true\n\n# Keyword Settings #\nstripped = false\nkeywords = ""')
+		path = inputPath+r"\\data\\"
+		config_file = open(path+"preferences.config", "w+")
+		config_file.write('### RENUMIT CONFIG FILE ###\n\n# API Keys #\nTMDb = ""\nTVDb = ""\nOMDb = ""\n\n\n# Settings #\nmatch_rate = "0.85"\ndebug = True\nkeep_non_mkv = True\nsorted_location = "***\output"\nremove_covers = true extras\n### Options for "non_video_files" --> sort/skip/delete/recycle (must be wrapped in quotes like "this")\nnon_video_files = "sort"\nbonus_folder_name = "Extras"\nremove_mkv_titles = true\n\n# Keyword Settings #\nstripped = true\nkeywords = ""\n\n\n# Rename Settings #\nspace_character = " "')
 		print(utilities.line+'\nConfig file created. Please edit it without reformatting. File located here: "'+os.path.realpath(config_file.name)+'"')
 		config_file.close
 	except:
 		print("Error_101: Failed to create or write to config file. Check write permissions.")
+
+
+
+
