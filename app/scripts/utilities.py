@@ -10,6 +10,7 @@ from send2trash import send2trash
 from os.path import join
 import time
 from pathlib import Path
+import re
 
 line = "--------------------------------------------------------------------------------------------------"
 clear_win = lambda: os.system('cls')											# Empty (windows) cmd window
@@ -427,3 +428,48 @@ def forceMakeDir(path):
 			return True
 		else:
 			return False
+
+
+# Function to replace specific characters
+def replaceStringCharacters(string):									# Function to replace special characters with more suitable options
+	
+	output = string.replace("¢","c")
+	output = output.replace("$","S")
+	output = output.replace("É","E")
+	output = output.replace("ë","e")
+	output = output.replace("é","e")
+	output = output.replace("ü","u")
+	output = output.replace("ê","e")
+	output = output.replace("ô","o")
+
+	return output
+
+
+# Function to check a given string for bad characters and symbols.
+# Support provided for time ie 12:30 --> 12-30
+def checkStringCharacters(string):
+	output = replaceStringCharacters(string)											# First run the replace string characters function.
+	colon_replacement = "-"																# Should be later improved to allow user to overwrite
+
+	output = output.encode("ascii", "ignore")
+	output = output.decode("ascii")
+	
+
+	# Time string detection (ie 10:00)
+	my_time = re.findall(r"\d+:\d+",output)
+	if my_time:
+		nums = my_time[0].split(":")
+		the_time = nums[0]+colon_replacement+nums[1]
+		output = re.sub(r'\d+:\d+',the_time, output)
+
+	# Strip other use of colons and replace with " -" 
+	output = re.sub(r'[:]'," -",output)
+	# Remove invalid characters, replace with nothing.
+	output = re.sub(r'[\\/*?;"<>|]',"",output)
+	#print(output)
+	return output
+
+# Function to remove unnecessary whitespace. eg: 'This is   an example' --> 'This is an example'
+def removeExtraWhiteSpace(string):
+	
+	return string.replace("  ", "").strip()	# Remove double spaces and then remove any additional whitespace at the start or end of the string.

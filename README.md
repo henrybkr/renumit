@@ -18,30 +18,29 @@ This is a re-write of an existing functional, yet messy application. The idea is
 
 ## Current Features
 * Interaction with the [TMDb](https://www.themoviedb.org/) API
-* Produce new file structures for both a main movie file and any corresponding extras
-* Move existing files/folder structures to the new preferred structure
-* Configurable user preferences
+* Produce and move files to new folder structures. Moves both main movie file along with any corresponding extras, following recommended Plex layout
+* Configurable personal user preferences
 * Able to accept either direct file path or directories as an input
 * Duplication helper utility (Will be utilised properly soon)
-* Configurable decisions to delete, recycle or skip over non-video files
+* Configurable decisions to sort, delete, recycle or simply skip over non-video files
 * Basic menu launched when launched without parameters
-* Run basic api call tests to confirm api is reachable
-* Collect and make use of data found via original filename and video container MediaInfo
-* Opportunity for a debug preview of renames before attempting to move anything and display some additional process information
+* Run initial API tests to confirm reachable before continuing
+* Collect and make use of data found via original filename and video container MediaInfo for new filenames
+* Debug previews of renames before attempting to move anything and display some additional process information
 * Folder clean up functionality for after the sorting process
-* Remove certain covers and titles from mkv files
-* Highlights 'problem' files (non mkv/mp4 files) before confirming whether to sort them.
-* Support for retaining soundtracks. Either moves to 'Soundtracks' directory, or a 'Soundtracks/Dynamic Name (2020)' dependent input folder structure.
+* Configurable ability to remove or retain covers and titles from mkv files
+* Support for retaining soundtracks. Either moves to 'Soundtracks' directory, or a 'Soundtracks/Dynamic Name (2020)' dependent input folder structure
+* Makes use of TMDB records for title and year for renames
+* Ensures new directory and file names are compatible for windows, replacing specific characters
+* Scoring based system for multiple search results from TMDB with a configurable user defined minimum match rate
+* Searches with and without a title year where available and if results are found
 
 ## Changelog
 <a href="changelog.md">Click here for changelog</a>
 
 ## Features in Progress
-* Further TMDB integration testing. Need better handling when title and year aren't matched (searching by title only and suggesting match to user?) 
-* Debug option in the config file to confirm actions and output additional information to the user
 * Offer configurable naming formats for the output filenames
 * Remove unwanted keywords from files that are not directly renamed
-* Configurable option to delete/recycle unwanted filetypes - needs improvement
 
 ## Features to Implement
 * Greater communication and involvement of the duplication utility script - currently operating mostly separately

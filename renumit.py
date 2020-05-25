@@ -206,12 +206,13 @@ try:
 							# Will only continue if the main movie file is located.
 							if mainMovieFileLocated:
 								try:
-									mainMovieFile = pathMainContentList[0]
+									if os.path.isfile(path):
+										mainMovieFile = path
+									else:
+										mainMovieFile = pathMainContentList[0]
 								except:
 									utilities.printColor("yellow", "\n-- Warning: Issue selecting main content file.", always=True)
-									
 									raise
-									
 								
 								# Only continue if main content is located.
 								if mainMovieFile:
@@ -228,7 +229,6 @@ try:
 										renameArray.append([mainMovieFile, (sortedDir+"\\"+newNames['directory']+"\\"+newNames['filename']), True])		# Append the original main file location and the new location. Set third array column as true to highlight is main file.
 
 										# Now turn to additional files inside the directory. Collect all files listings and remove the "main" file
-
 										extraFiles = []																									# Empty list to hold all full file listings from the input path
 										for (current_path, dirs, files) in os.walk(validPaths[i]):
 											for file in files:
@@ -241,7 +241,6 @@ try:
 											extraFiles.remove(mainMovieFile)															# Remove the "main" file from the full list of all files
 
 											# Now get new filenames for any bonus files that we plan to keep
-
 											for y in extraFiles:
 												onlyFile = os.path.basename(y)
 												confirmedFilename = renamer.checkFilename(configData, onlyFile)

@@ -73,16 +73,21 @@ def basicInfo(path):
 	########################## 
 	# Now let's focus on codec
 
+	encodingRef = videoInfo.lower().split('writing library')[-1].split('                                 :')[0].split('\nlanguage')[0]		# Split to only get relevant encoding data
+	codecRef = videoInfo.lower().split('\nduration')[0]		# Split to only get relevant encoding data
+	#print(encodingRef)
+	#print(codecRef)
+
 	try:
-		if "x264" in videoInfo.lower():
+		if "x264" in encodingRef or "x264" in codecRef:
 			codec = "x264"
-		elif "avc" in videoInfo.lower():
+		elif "h264" in encodingRef or "h264" in codecRef or " avc " in encodingRef or " avc " in codecRef:
 			codec = "H.264"
-		elif "x265" in videoInfo.lower():
+		elif "x265" in encodingRef or "x265" in codecRef:
 			codec = "x265"
-		elif "hevc" in videoInfo.lower():
+		elif "hevc" in encodingRef or "hevc" in codecRef:
 			codec = "H.265"
-		elif "vp9" in videoInfo.lower():
+		elif "vp9" in encodingRef or "vp9" in codecRef:
 			codec = "VP9"
 		else:
 			print("Warning -- Not managing to find a matching codec from the mediainfo string.")
@@ -102,10 +107,12 @@ def basicInfo(path):
 				# Might need to revisit this later. For now, assuming interlaced if cannot find "progressive"
 				scanType = "interlaced"
 		else:
+			#print(codec)
 			# Some codecs don't include this kind of data. Additional checks may be required.
-			# Further improvements should be made here for additional codecs
-			if codec is "x265" or codec is "H.265":
-				scanType = "p"
+			# Further improvements should be made here for additional codecs.
+
+			# Note, for now assuming the scan type is progressive. Confirmed filebot does the same.
+			scanType = "p"
 	except:
 		print("Warning -- Scan type check failure")
 	

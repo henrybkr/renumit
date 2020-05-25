@@ -3,6 +3,18 @@
 # 'Renumit' Changelog
 > Overview of changes made to the app.
 
+## 2020-05-25
+* Now replaces 'bad' characters in titles with English versions. This should later be configurable.
+* String detection on title for certain symbols such as colons that are refused by Windows. "Example: A documentary" becomes "Example - A documentary". Will later be configurable.
+* String replacement support for time strings via regex eg "10:30" becomes "10-30" whilst still working as usual with above replacements.
+* Additional check for 'WEB' source content included. Done as a final check because ' web ' can often be included in a movie title.
+* Minor updates to movie edition detections.
+* Fix for single file path input not being found as the 'main' movie file. 
+* Remove unnecessary whitespace from output filenames.
+* Bugfix for still using input year as output year. Now always using TMDB year and title rather than input.
+* Feature to find best match without providing a year. Bases the final 'best decision' on any name/year collected from original file/folder. Requires more testing but appears to be working as intended.
+* Confined the mediainfo text being searched for codec on mediainfoReview function (fixes issue where bad title returns incorrect codec).
+
 ## 2020-05-18
 * Soundtrack sorting improvements, now sending to either 'Soundtracks' or 'Soundtracks/Example Folder' directories dependent on input path structure.
 * Improved sorting of non-mkv files when told to do so in config. Note that filenames are not changed at all at this point. This also allows all filetypes, including likely unwanted filetypes.

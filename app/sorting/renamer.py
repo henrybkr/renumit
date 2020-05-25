@@ -53,21 +53,39 @@ def getNameYear(inputPath, debugMode):
 # Function to get output filenames and directory names based on the user config and details we have at hand
 def getNames(configJSON, nameYearList, filenameData, mediaInfoData):
 	
-	space = configJSON['spaceCharacter']																					# Collect the character the user prefers to use as a 'space' character.
+	space = configJSON['spaceCharacter']																															# Collect the character the user prefers to use as a 'space' character.
+	tryWithoutYear = False
 
-	response = tmdbHelper.search(configJSON['apiKeys'][0]['key'], nameYearList['title'], nameYearList['year'])				# First run a search via TMDB api
+	if nameYearList['year']:
+		response = tmdbHelper.search(configJSON['apiKeys'][0]['key'], nameYearList['title'], nameYearList['year'])				# Default search
+		if int(response['total_results']) == 0:
+			tryWithoutYear = True
+	
+	# Try again if failed response.
+	if not nameYearList['year'] or tryWithoutYear:
+		response = tmdbHelper.search(configJSON['apiKeys'][0]['key'], nameYearList['title'])
 
-	#localTitle				= utilities.addSpaces(nameYearList['title'],space)												# Collect name and year from the local file.	
-	#localYear				= utilities.addSpaces(nameYearList['year'],space)
-	localNameYear		= nameYearList['title']+" ("+nameYearList['year']+")"
+
+	if nameYearList['year']:
+		localNameYear			= nameYearList['title']+" ("+nameYearList['year']+")"
+	else:
+		localNameYear			= nameYearList['title']
 
 	## Now run the comparison function to looks for an appropriate match the search data
 
 	try:
-		parsedResponse = tmdbHelper.compareTMDBNameYear(response, localNameYear, configJSON)															
+		parsedResponse = tmdbHelper.compareTMDBNameYear(response, localNameYear, configJSON, bool(nameYearList['year']))
+		
+		# If fail response, try again without a year (assuming we haven't already tried)
+		if not parsedResponse and bool(nameYearList['year']) is True:
+			#print("---> "+nameYearList['title'])
+			parsedResponse = tmdbHelper.compareTMDBNameYear(response, nameYearList['title'], configJSON, False)
+
 		#utilities.printColor("orange", parsedResponse, always=True)
 		if parsedResponse:
-			title = utilities.addSpaces(parsedResponse['title'],space)
+			title = utilities.checkStringCharacters(parsedResponse['title'])																	# Update the title once ensuring string characters are acceptable
+			title = utilities.removeExtraWhiteSpace(title)																	# Update the title to ensure there is no unnecessary whitespace
+			
 			year = parsedResponse['year']
 			yearBrackets = utilities.addSpaces("("+year+")", space)
 		else:
@@ -76,18 +94,19 @@ def getNames(configJSON, nameYearList, filenameData, mediaInfoData):
 		utilities.printColor("red", "parseTMDB error", always=True)
 		raise
 
+	
 	resolution			= utilities.addSpaces((str(mediaInfoData['height'])+mediaInfoData['scanType']),space)
 	codec				= utilities.addSpaces(mediaInfoData['codec'],space)
 	edition				= utilities.addSpaces(filenameData['edition'],space)
 	source				= utilities.addSpaces(filenameData['source'],space)
 	ext					= filenameData['extension']
 
-	newOutputFilename = (title+yearBrackets+resolution+codec+edition+source).strip()+ext
+	newOutputFilename = (utilities.addSpaces(title,space)+yearBrackets+resolution+codec+edition+source).strip()+ext
 	
 	if space == ".":
-		newDirName = title+space+nameYearList['year']
+		newDirName = title+space+year
 	else:
-		newDirName = nameYearList['title']+" ("+nameYearList['year']+")"
+		newDirName = title+space+"("+year+")"
 
 	return {'directory': newDirName, 'filename': newOutputFilename}
 
@@ -129,9 +148,9 @@ def getNewExtraPath(configJSON, debugMode, currentFullPath, confirmedNewFilename
 			# Check if the path just refers to a 'soundtrack' or if we have a usable directory name for the soundtrack folder.
 			dirName = os.path.basename(os.path.dirname(path))
 			inputFolderDir = os.path.basename(originalInputPath)
-			utilities.printColor("green", dirName+" --> "+inputFolderDir, always=True)
+			#utilities.printColor("green", dirName+" --> "+inputFolderDir, always=True)
 			if dirName != inputFolderDir:
-				print(os.path.basename(currentFullPath))
+				#print(os.path.basename(currentFullPath))
 				newFolderPath = "\\"+folder+"\\Soundtracks\\"+removePrefKeywords(configJSON, os.path.basename(os.path.dirname(currentFullPath)))+"\\"
 			else:
 				newFolderPath = "\\"+folder+"\\Soundtracks\\"			
@@ -165,6 +184,8 @@ def getNewExtraPath(configJSON, debugMode, currentFullPath, confirmedNewFilename
 # Function to check and potentially modify input filenames
 def checkFilename(configJSON, inputFilename):
 
+
+	
 	## Here we should run a few things:
 
 	# - Checks for bad characters (non-english characters that might mess with a media database)
@@ -174,6 +195,7 @@ def checkFilename(configJSON, inputFilename):
 	# Note, don't try to do everything here. Launch other functions here as each might get larger.
 
 	outputFilename = removePrefKeywords(configJSON, inputFilename)
+	outputFilename = utilities.removeExtraWhiteSpace(outputFilename)
 
 	return outputFilename
 
@@ -305,7 +327,7 @@ def move(arrayElement, configFile):
 				else:
 					error = "Move attempted - Moved file doesn't exist. Potential permission error."
 			else:
-				error = "This file is not a mkv file and was skipped. 111"
+				error = "This file is not a mkv file and was skipped."
 		else:
 			error = "File already exists."
 	else:

@@ -15,7 +15,8 @@ import os
 #import utilities, mediaInfoReview # pylint: disable=import-error
 
 
-from ..scripts.utilities import *
+#from ..scripts.utilities import *
+from ..scripts import utilities
 
 
 
@@ -81,7 +82,10 @@ def getYear(path, debug):
 def getName(path, debug, year=None):
 
 	try:
-		title = stripBadCharacters(path).replace("."," ").replace(')',"").replace('(',"").replace(']','').replace('[','').split(year)[0].strip().split("\\")[-1]
+		if year:
+			title = stripBadCharacters(path).replace("."," ").replace(')',"").replace('(',"").replace(']','').replace('[','').split(year)[0].strip().split("\\")[-1]
+		else:
+			title = stripBadCharacters(path).replace("."," ").replace(')',"").replace('(',"").replace(']','').replace('[','').strip().split("\\")[-1]
 
 		return title
 	except:
@@ -125,7 +129,7 @@ def getEdition(path):
 		edition = "Criterion"
 	elif (" extended " in ref):
 		edition = "Extended"
-	elif (" rm4k " in ref) or ("4k remastered" in ref) or ("4k remaster" in ref) or (") rm (" in ref):
+	elif (" rm4k " in ref) or ("4k remastered" in ref) or ("4k remaster" in ref) or (") rm (" in ref) or ("remastered" in ref):
 		edition = "Remastered"
 	elif (" unrated " in ref):
 		edition = "Unrated"
@@ -146,7 +150,7 @@ def getEdition(path):
 		edition = "IMAX"
 	elif (" open matte " in ref):
 		edition = "Open Matte"
-	elif (") diamond (" in ref):
+	elif (") diamond (" in ref or "diamond edition" in ref):
 		edition = "Diamond Edition"
 	elif (" final cut " in ref):
 		edition = "Final Cut"
@@ -160,7 +164,7 @@ def getSource(path):
 
 	ref = path.lower().replace("."," ")		# Lowercase for easier querying
 	
-	if ("bluray" in ref) or ("bdrip" in ref) or ("blu ray" in ref) or (" bd " in ref) or ("blu-ray" in ref):
+	if ("bluray" in ref) or ("bdrip" in ref) or ("blu ray" in ref) or (" bd " in ref) or ("blu-ray" in ref) or ("brrip" in ref):
 		source = "Blu-Ray"
 	elif ("hddvd" in ref) or ("hd-dvd" in ref):
 		source = "HDDVD"
@@ -168,5 +172,10 @@ def getSource(path):
 		source = "DVD"
 	elif ("web-dl" in ref) or ("web dl" in ref) or ("web x265" in ref) or ("web x264" in ref) or ("webrip" in ref) or ("web-rip" in ref) or ("web h.264" in ref) or ("web h.265" in ref):
 		source = "WEB"
+
+	# Final check if source is still not found.
+	if source == "":
+		if (" web " in ref):
+			source = "WEB"
 	
 	return source
