@@ -3,10 +3,6 @@
 ##########################################################################################################################
 ## ~ A Python script used for querying databases and renaming media accordingly based on personal preference and        ##
 ##   support for the Plex media servers.                                                                                ##
-##                                                                                                                      ##
-## ! Ideas/Issues/Concerns:                                                                                             ##
-##                                                                                                                      ##
-## - When more than one mkv in main directory, assuming that largest is the main content. Might be a problem.			##
 ##########################################################################################################################
 
 #########################
@@ -37,6 +33,9 @@ testMode = True
 
 try:
 	mainDir = os.path.dirname(os.path.abspath(__file__))
+	#print(mainDir)
+	#os.system("pause")
+
 	utilities.clear_win()																														# Clear the window on first launch.
 
 	utilities.intro(mainDir)																													# Run application intro.
@@ -76,6 +75,7 @@ try:
 
 			filePaths = utilities.getValidPaths(debugMode, sys.argv[1:])																		# Review potential file paths provided to app. Return valid paths.
 			# Produce a menu to the user if no file paths provided.
+
 			if not sys.argv[1:]:
 				utilities.beginMenu()
 			elif filePaths:

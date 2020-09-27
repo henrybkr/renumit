@@ -164,7 +164,7 @@ def getSource(path):
 
 	ref = path.lower().replace("."," ")		# Lowercase for easier querying
 	
-	if ("bluray" in ref) or ("bdrip" in ref) or ("blu ray" in ref) or (" bd " in ref) or ("blu-ray" in ref) or ("brrip" in ref):
+	if ("bluray" in ref) or ("bdrip" in ref) or ("blu ray" in ref) or (" bd " in ref) or ("blu-ray" in ref) or ("brrip" in ref) or (" br " in ref):
 		source = "Blu-Ray"
 	elif ("hddvd" in ref) or ("hd-dvd" in ref):
 		source = "HDDVD"

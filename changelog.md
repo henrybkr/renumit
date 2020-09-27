@@ -3,6 +3,10 @@
 # 'Renumit' Changelog
 > Overview of changes made to the app.
 
+## 2020-09-27
+* Minor update for bluray source detection.
+* Minor text replacement string update.
+
 ## 2020-05-25
 * Now replaces 'bad' characters in titles with English versions. This should later be configurable.
 * String detection on title for certain symbols such as colons that are refused by Windows. "Example: A documentary" becomes "Example - A documentary". Will later be configurable.

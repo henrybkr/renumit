@@ -441,6 +441,7 @@ def replaceStringCharacters(string):									# Function to replace special chara
 	output = output.replace("ü","u")
 	output = output.replace("ê","e")
 	output = output.replace("ô","o")
+	output = output.replace("ñ","n")
 
 	return output
 
