@@ -1,0 +1,45 @@
+{
+    "api_keys": {
+        "tmdb": "",
+        "tvdb": "",
+        "omdb": ""
+    },
+
+    "api_preferences": {
+        "always_check": true,
+        "hours_since_require_check": 1
+    },
+
+    "settings": {
+
+        "debugging": {
+            "debug": true
+        },
+
+        "general_settings": {
+            
+        },
+
+        "matching": {
+            "match_rate": "0.87"
+        },
+
+        "renaming": {
+            "space_character": " ",
+            "sorted_dir": "***\\_sorted",
+            "output_bonus_dir_name": "Extras",
+            "remove_keywords": []
+
+        },
+
+        "file_preferences": {
+            "non_video_files": "recycle"
+        },
+
+        "file_fixes": {
+            "remove_mkv_covers": true,
+            "remove_mkv_titles": true
+            
+        }
+    }
+}

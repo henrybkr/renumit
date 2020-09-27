@@ -6,7 +6,7 @@
 ##########################################################################################################################
 
 # Required imports
-import sys
+import sys, os
 #sys.path.insert(1, r'\app\scripts')
 #sys.path.insert(1, r'\app\api')
 
@@ -21,12 +21,13 @@ def apiKeyAvailable(data):
 	# Loop through the received api json data to check existence of api keys
 	
 	# Basic check to confirm all api keys are present before moving on.
-
 	numApis = len(data)	# Total number of api keys
 	apiTally = 0
-	for p in data:
-		if p["key"]:
+	for key in data:
+		if(data[key]):
 			apiTally+=1																				# Increment tally
+
+	# Now run a check to ensure we have API keys. Inform the user if otherwise.
 	if not apiTally:
 		return(0, "-- Error: No API keys found. Please enter one in the config file to continue!")	# no API keys available
 	elif numApis-apiTally==1:
@@ -38,8 +39,6 @@ def apiKeyAvailable(data):
 
 # Functionality used for testing that api's are operational with a specified search. Offers debug mode to output the received string to the user if desired.
 def apiTest(api, key, debug=None):
-	#result = None																					# Initialised as empty. Will fail if not changed.
-	
 	try:
 		# TMDb
 		if api is "tmdb":

@@ -42,38 +42,38 @@ try:
 	
 
 	apiKeychain = []
-	debugMode = False																															# Set to false but later overwritten.
+	configData = readConfig.readConfig(mainDir)																									# Collect config json.
 
-	configJSON = readConfig.read(mainDir)																										# Collect config json.
-	configData = json.loads(configJSON)
-
-	if not(configJSON):
+	if not(configData):
 		print("-- Hmm, problem with your configuration settings!")
-	else:
-		debugMode = bool(configData['debugMode'])																								# Enable debug flag if in config data.
+	else:																							# Enable debug flag if in config data.
 		utilities.writeLine()
-		utilities.printColor("green", "-- Config file loaded ----------------------------------------------------------------------------", debugMode=debugMode)
+		utilities.printColor("green", "-- Config file loaded ----------------------------------------------------------------------------", debugMode=configData['settings']['debugging']['debug'])
 		
-		apiCheckResult = configCheck.apiKeyAvailable(configData['apiKeys'])																		# Confirm api keys work.
+		apiCheckResult = configCheck.apiKeyAvailable(configData['api_keys'])																		# Confirm api keys work.
 		
 		if not apiCheckResult[0]:
 			utilities.printColor("red", "\n-- Critical Error: No API keys available. Please add at least one to preferences.config.", always=True)
 		else:
 			# If at least one api key is found, test which ones are working.
 			if apiCheckResult[0] == 2:
-				utilities.printColor("green", apiCheckResult[1], debugMode=debugMode)																										# Output api key info.
+				utilities.printColor("green", apiCheckResult[1], debugMode=configData['settings']['debugging']['debug'])																										# Output api key info.
 			else:
-				utilities.printColor("yellow", apiCheckResult[1], debugMode=debugMode)																										# Output api key info.
+				utilities.printColor("yellow", apiCheckResult[1], debugMode=configData['settings']['debugging']['debug'])																										# Output api key info.
 
-			# Now lets check that the keys are functional.
-			tmdbWorking = configCheck.apiTest("tmdb", configData['apiKeys'][0]['key'], debugMode)
-			tvdbWorking = configCheck.apiTest("tvdb", configData['apiKeys'][1]['key'], debugMode)
-			omdbWorking = configCheck.apiTest("omdb", configData['apiKeys'][2]['key'], debugMode)
+			# Now lets check that the keys are functional. First check if we've done a recent check (within the last hour) - If yes, we will assume they are already fine (saving us some time!)
+
+			##configJSON = readConfig.read(mainDir)																										# Collect config json.
+			##configData = json.loads(configJSON)
+
+			tmdbWorking = configCheck.apiTest("tmdb", configData['api_keys']['tmdb'], configData['settings']['debugging']['debug'])
+			tvdbWorking = configCheck.apiTest("tvdb", configData['api_keys']['tvdb'], configData['settings']['debugging']['debug'])
+			omdbWorking = configCheck.apiTest("omdb", configData['api_keys']['omdb'], configData['settings']['debugging']['debug'])
 
 			# Currently focusing on tmdb. Should consider how to add support for others later.
 			#   Example: read config for preferred api-only or preferred order (might fail to find a title with one?)
 
-			filePaths = utilities.getValidPaths(debugMode, sys.argv[1:])																		# Review potential file paths provided to app. Return valid paths.
+			filePaths = utilities.getValidPaths(configData['settings']['debugging']['debug'], sys.argv[1:])																		# Review potential file paths provided to app. Return valid paths.
 			# Produce a menu to the user if no file paths provided.
 
 			if not sys.argv[1:]:
@@ -87,8 +87,8 @@ try:
 					validPaths, invalidPaths = [], []
 					inputPathsProcessedCount = 0     				# Count used to track how many input directories (parametors) have been processed.
 					processedFileCount = 0							# Same as above but for files.
-					if not configData['relativeRename']:
-						sortedDir = configData['sortedDirectory']
+					if not configData['relative_renaming']:
+						sortedDir = configData['settings']['renaming']['sorted_dir']
 
 					# Error lists
 					cleanupPaths, sortingErrors, nameYearsArray, renameArray = [],[],[],[]		# Lists for holding paths about errors, clean up errors, rename errors and the planned renames.
@@ -107,13 +107,13 @@ try:
 							raise
 					
 					# Output validity listings if debug mode enabled
-					if debugMode:
+					if configData['settings']['debugging']['debug']:
 						utilities.pathValidityDebug(validPaths, invalidPaths)
 					
 					# Once the preliminary checks are complete, move onto grabbing info				
 					for path in validPaths:
 
-						getNameYear_result = renamer.getNameYear(path, debugMode)
+						getNameYear_result = renamer.getNameYear(path, configData['settings']['debugging']['debug'])
 				
 						if getNameYear_result[0] == False:
 							print("\n-- Error: "+getNameYear_result[1])
@@ -140,8 +140,8 @@ try:
 
 							# First we need to confirm if we need a relative output directory or not.
 
-							if configData['relativeRename']:
-								sortedDir = utilities.getRelativeOutputPath(path, configData['sortedDirectory'])
+							if configData['relative_renaming']:
+								sortedDir = utilities.getRelativeOutputPath(path, configData['settings']['renaming']['sorted_dir'])
 
 								if not utilities.checkExist(sortedDir):
 									if not utilities.forceMakeDir(sortedDir):
@@ -172,7 +172,7 @@ try:
 									for x in temp_pathMainContentList:
 										
 										if not (".mkv" in x or ".mp4" in x):										
-											utilities.deleteOrIgnore(configData, debugMode, x)									# Run the function to decide what to do with the non-video filetype, depending on user settings.
+											utilities.deleteOrIgnore(configData, configData['settings']['debugging']['debug'], x)									# Run the function to decide what to do with the non-video filetype, depending on user settings.
 										else:
 											pathMainContentList.append(x)														# Remove non video files from the array if any exist.
 
@@ -187,7 +187,7 @@ try:
 										#print(pathMainContentList)
 										sortingErrors.append({'path': path, 'error': "More than one file in main directory"})	# Report back and error about multiple video files in main movie directory.
 									else:
-										#if debugMode:
+										#if configData['settings']['debugging']['debug']:
 											#print(("Debug -- Confirmed updated 'main' file: ")+utilities.getColor("yellow", pathMainContentList[0]))
 										mainMovieFileLocated = True
 								elif len(temp_pathMainContentList) == 0:
@@ -244,12 +244,12 @@ try:
 											for y in extraFiles:
 												onlyFile = os.path.basename(y)
 												confirmedFilename = renamer.checkFilename(configData, onlyFile)
-												renameArray.append([y, (sortedDir+"\\"+newNames['directory']+renamer.getNewExtraPath(configData, debugMode, y, confirmedFilename, path)), False])
+												renameArray.append([y, (sortedDir+"\\"+newNames['directory']+renamer.getNewExtraPath(configData, configData['settings']['debugging']['debug'], y, confirmedFilename, path)), False])
 						
 							bar.next()
 							i+=1																								# Finish this loop by incrementing the reference number variable 
 
-					utilities.renameTable(renameArray, debugMode)																# Output the expected renames if in debug mode (table format)
+					utilities.renameTable(renameArray, configData['settings']['debugging']['debug'])																# Output the expected renames if in debug mode (table format)
 
 					# Launch the error report functionality. Only displays errors if there are any.
 					utilities.reportErrors(filePaths, invalidPaths, sortingErrors)
@@ -259,7 +259,7 @@ try:
 						utilities.printColor("yellow", "\n-- Warning: Cannot continue as there are no valid renames to process.", always=True)
 					else:
 						# Output some user config settings if in debug mode:
-						if debugMode:
+						if configData['settings']['debugging']['debug']:
 							utilities.configTable(configData)
 
 						

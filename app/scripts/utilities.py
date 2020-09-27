@@ -373,11 +373,9 @@ def configTable(configData):
 	if configData:
 		tableData = []
 		tableData.append([getColor("orange", "Your Sorting/File Modification Preferences"), getColor("orange", "Value")])
-		tableData.append([getColor("orange", "→")+" Remove covers from MKV's?", mainExtrasStringSwitch(configData['removeCovers'])])
-		
-		tableData.append([getColor("orange", "→")+" Remove video titles from MKV's?", mainExtrasStringSwitch(configData['removeMKVTitle'])])
-		tableData.append([getColor("orange", "→")+" Keep non-MKV Files?", configData['keepNonMkv']])
-		tableData.append([getColor("orange", "→")+" What to do with non-video files?", configData['nonVideoFiles']])
+		tableData.append([getColor("orange", "→")+" Remove covers from MKV's?", mainExtrasStringSwitch(configData['settings']['file_fixes']['remove_mkv_covers'])])
+		tableData.append([getColor("orange", "→")+" Remove video titles from MKV's?", mainExtrasStringSwitch(configData['settings']['file_fixes']['remove_mkv_titles'])])
+		tableData.append([getColor("orange", "→")+" Keep non-video Files?", configData['settings']['file_preferences']['non_video_files']])
 
 		print("\n"+AsciiTable(tableData).table)													# Print the table of errors
 	else:

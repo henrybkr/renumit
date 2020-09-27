@@ -53,17 +53,17 @@ def getNameYear(inputPath, debugMode):
 # Function to get output filenames and directory names based on the user config and details we have at hand
 def getNames(configJSON, nameYearList, filenameData, mediaInfoData):
 	
-	space = configJSON['spaceCharacter']																															# Collect the character the user prefers to use as a 'space' character.
+	space = configJSON['settings']['renaming']['space_character']																															# Collect the character the user prefers to use as a 'space' character.
 	tryWithoutYear = False
 
 	if nameYearList['year']:
-		response = tmdbHelper.search(configJSON['apiKeys'][0]['key'], nameYearList['title'], nameYearList['year'])				# Default search
+		response = tmdbHelper.search(configJSON['api_keys']['tmdb'], nameYearList['title'], nameYearList['year'])				# Default search
 		if int(response['total_results']) == 0:
 			tryWithoutYear = True
 	
 	# Try again if failed response.
 	if not nameYearList['year'] or tryWithoutYear:
-		response = tmdbHelper.search(configJSON['apiKeys'][0]['key'], nameYearList['title'])
+		response = tmdbHelper.search(configJSON['api_keys']['tmdb'], nameYearList['title'])
 
 
 	if nameYearList['year']:
@@ -111,7 +111,7 @@ def getNames(configJSON, nameYearList, filenameData, mediaInfoData):
 	return {'directory': newDirName, 'filename': newOutputFilename}
 
 def getNewExtraPath(configJSON, debugMode, currentFullPath, confirmedNewFilename, originalInputPath):
-	folder = configJSON['bonusFolderName']
+	folder = configJSON['settings']['renaming']['output_bonus_dir_name']
 
 	path = currentFullPath.lower()
 	#print(path)
@@ -267,15 +267,15 @@ def move(arrayElement, configFile):
 
 	# Check that the config answers are valid, else return errors and fail next step.
 	try:
-		shouldDeleteCovers = int(configFile['removeCovers'])
+		shouldDeleteCovers = int(configFile['settings']['file_fixes']['remove_mkv_covers'])
 	except:
-		print("Failed to get config file['removeCovers']")
+		print("Failed to get configFile['settings']['file_fixes']['remove_mkv_covers']")
 		shouldDeleteCovers = 0
 	try:
-		shouldRemoveMKVTitle = int(configFile['removeMKVTitle'])
+		shouldRemoveMKVTitle = int(configFile['settings']['file_fixes']['remove_mkv_titles'])
 		shouldRenameNonMKV = 0
 		#print(configFile['nonVideoFiles'])
-		if "sort" in configFile['nonVideoFiles'].lower():
+		if "sort" in configFile['settings']['file_preferences']['non_video_files'].lower():
 			shouldRenameNonMKV = 1
 	except:
 		print("Failed to get config file['removeCovers']")

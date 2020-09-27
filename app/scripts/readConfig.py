@@ -12,7 +12,29 @@ import sys
 from . import utilities
 import json, os
 
+
+
+# Updating config feature
+def readConfig(path):
+
+	configPath = path+r"\\data\\preferences.json"															# Expected relative path to the renumit config file.
+
+	with open(configPath, 'r') as conf:
+		configJSON = json.loads(conf.read())																# Load and save the config json.
+
+	try:
+		if "***" in configJSON['settings']['renaming']['sorted_dir']:
+			appendData =  { "relative_renaming": True }														# Element to be appended (append that we want relative renaming)
+		else:
+			appendData = { "relative_renaming": False }														# Element to be appended (append that we DON'T want relative renaming)
+		configJSON.update(appendData)																		# Update the JSON object
+		return configJSON																					# Return the json config file for use throughout the application.
+	except: 
+		return False																						# Returns false if there is an issue with parsing the json file (likely the user has messed up their config file).
+
 # Read from the config file if it exists, else generate it.
+
+## DEPRECATED - TO BE DELETED
 def read(path):
 
 	configPath = path+r"\\data\\preferences.config"															# Expected relative path to the renumit config file.
