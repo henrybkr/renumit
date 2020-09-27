@@ -6,8 +6,9 @@
 ## 2020-09-27
 * Minor update for bluray source detection.
 * Minor text replacement string update.
-* Update to preference configuration - Switched to JSON format. Note - Empty config file output coming in next update for when not present. Example file provided though.
+* Update to preference configuration - Switched to JSON format with a nested format. Note - Empty config file output coming in next update for when not present. Example file provided though.
 * Removed some redundant config settings.
+* Added some future config settings references.
 * Provided support for new JSON config format - Will likely be some bugs.
 
 ## 2020-05-25
